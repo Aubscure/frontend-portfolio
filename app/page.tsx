@@ -1,7 +1,8 @@
 import { client } from "@/src/sanity/client";
 import { ProfileData } from "@/src/types/profile";
+import ProjectsSection from "./components/ProjectsSection";
 import Image from "next/image";
-
+export const revalidate = 0;
 // 1. The GROQ Query
 // We fetch the first document of type "profile" and expand the asset URLs
 const profileQuery = `*[_type == "profile"][0]{
@@ -103,6 +104,9 @@ export default async function Home() {
           )}
         </div>
       </section>
+
+      {/* Render the isolated Projects Component */}
+      <ProjectsSection />
     </main>
   );
 }
