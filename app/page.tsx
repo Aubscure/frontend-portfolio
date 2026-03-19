@@ -1,65 +1,108 @@
+import { client } from "@/src/sanity/client";
+import { ProfileData } from "@/src/types/profile";
 import Image from "next/image";
 
-export default function Home() {
+// 1. The GROQ Query
+// We fetch the first document of type "profile" and expand the asset URLs
+const profileQuery = `*[_type == "profile"][0]{
+  firstName,
+  lastName,
+  nickname,
+  "logoUrl": logo.asset->url,
+  aboutDescription,
+  "profilePictureUrl": profilePicture.asset->url,
+  "resumeUrl": resume.asset->url,
+  techStack,
+  socialLinks
+}`;
+
+// 2. The Server Component
+// Notice the 'async' keyword. This runs securely on the server.
+export default async function Home() {
+  // Fetch the data and enforce our TypeScript interface
+  const profile: ProfileData = await client.fetch(profileQuery);
+
+  // Fallback UI if the CMS is empty to prevent application crashes
+  if (!profile) {
+    return (
+      <div className="p-8 text-center text-red-500">
+        Please publish your profile in the CMS first.
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+    <main className="max-w-4xl mx-auto p-8 font-sans text-gray-800">
+      {/* Header Section */}
+      <header className="flex justify-between items-center py-6 border-b border-gray-200">
+        <div className="flex items-center gap-4">
+          {profile.logoUrl && (
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+              src={profile.logoUrl}
+              alt="Logo"
+              width={50}
+              height={50}
+              className="rounded-md"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          )}
+          <h1 className="text-2xl font-bold tracking-tight">
+            {profile.firstName} {profile.lastName}{" "}
+            <span className="text-gray-400 font-normal">
+              ({profile.nickname})
+            </span>
+          </h1>
         </div>
-      </main>
-    </div>
+      </header>
+
+      {/* About Section */}
+      <section className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+        <div className="md:col-span-2 space-y-6">
+          <h2 className="text-3xl font-semibold">About Me</h2>
+          <p className="text-lg leading-relaxed text-gray-600">
+            {profile.aboutDescription}
+          </p>
+
+          <div className="pt-4">
+            <h3 className="text-xl font-medium mb-3">Tech Stack</h3>
+            <div className="flex flex-wrap gap-2">
+              {profile.techStack?.map((tech, index) => (
+                <span
+                  key={index}
+                  className="px-3 py-1 bg-gray-100 text-sm font-mono rounded-md border border-gray-200"
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-6">
+            <a
+              href={profile.resumeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-black text-white px-6 py-3 rounded-md font-medium hover:bg-gray-800 transition-colors"
+            >
+              Download Resume
+            </a>
+          </div>
+        </div>
+
+        {/* Profile Picture */}
+        <div className="md:col-span-1">
+          {profile.profilePictureUrl && (
+            <div className="relative w-full aspect-square rounded-xl overflow-hidden shadow-lg">
+              <Image
+                src={profile.profilePictureUrl}
+                alt={`${profile.firstName}'s Profile Picture`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
+            </div>
+          )}
+        </div>
+      </section>
+    </main>
   );
 }

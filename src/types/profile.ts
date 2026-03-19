@@ -1,0 +1,16 @@
+export interface ProfileData {
+  firstName: string;
+  lastName: string;
+  nickname: string;
+  logoUrl: string;
+  aboutDescription: string;
+  profilePictureUrl: string;
+  resumeUrl: string;
+  techStack: string[];
+  socialLinks: {
+    github: string;
+    linkedin: string;
+    email: string;
+    instagram: string;
+  };
+}
