@@ -53,29 +53,6 @@ export default function Footer({ profile }: Props) {
         >
           BUILT_WITH: NEXT.JS // TAILWIND // SANITY_CMS
         </p>
-
-        {/* Right: Social icons */}
-        {links.length > 0 && (
-          <nav
-            className="flex items-center gap-4"
-            aria-label="Footer social links"
-          >
-            {links.map((href) => (
-              <SocialIcon
-                key={href}
-                href={href}
-                size={16}
-                style={{ color: "var(--color-ink-dim)" }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.color = "var(--color-red)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.color = "var(--color-ink-dim)")
-                }
-              />
-            ))}
-          </nav>
-        )}
       </div>
 
       {/* Bottom accent strip */}
