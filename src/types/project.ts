@@ -1,3 +1,5 @@
+// app/types/project.ts
+
 export interface ProjectData {
   _id: string;
   title: string;

@@ -1,3 +1,5 @@
+// app/types/profile.ts
+
 export interface ProfileData {
   firstName: string;
   lastName: string;
