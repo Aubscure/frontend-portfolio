@@ -6,13 +6,28 @@ import type { ProfileData, ProjectData } from "@/src/types";
 import HeroSection from "@/components/HeroSection";
 import ProjectsSection from "@/components/ProjectsSection";
 import AboutSection from "@/components/AboutSection";
-import Footer from "@/components/Footer";
 import ContactSection from "@/components/ContactSection";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "Portfolio",
-  description: "Full-stack developer and interface designer.",
+  description: "Full-stack developer — precision engineering for the web.",
 };
+
+/**
+ * SectionDivider
+ *
+ * A hairline rule with a centered label — mimics instrument cluster
+ * segment separators. No component file needed; it's trivially small.
+ */
+function SectionDivider() {
+  return (
+    <div
+      className="max-w-[1280px] mx-auto px-8"
+      style={{ borderTop: "1px solid var(--color-border)" }}
+    />
+  );
+}
 
 export default async function HomePage() {
   const [profile, projects] = await Promise.all([
@@ -32,19 +47,15 @@ export default async function HomePage() {
     <>
       <HeroSection profile={profile} />
 
-      <div
-        className="max-w-[1200px] mx-auto px-10"
-        style={{ borderTop: "1px solid var(--color-border)" }}
-      />
+      <SectionDivider />
 
       <ProjectsSection projects={projects} />
 
-      <div
-        className="max-w-[1200px] mx-auto px-10"
-        style={{ borderTop: "1px solid var(--color-border)" }}
-      />
+      <SectionDivider />
 
       <AboutSection profile={profile} />
+
+      <SectionDivider />
 
       <ContactSection socialLinks={profile.socialLinks} />
 

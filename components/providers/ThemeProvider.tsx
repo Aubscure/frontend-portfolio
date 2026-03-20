@@ -16,7 +16,7 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: "light",
+  theme: "dark", // JDM aesthetic is always dark-first
   toggle: () => {},
 });
 
@@ -24,14 +24,19 @@ export function useTheme() {
   return useContext(ThemeContext);
 }
 
+function applyTheme(t: Theme) {
+  const root = document.documentElement;
+  root.classList.toggle("dark", t === "dark");
+}
+
 export default function ThemeProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [theme, setTheme] = useState<Theme>("light");
+  // Default to dark — the JDM instrument panel is always dark
+  const [theme, setTheme] = useState<Theme>("dark");
 
-  // Read persisted preference or fall back to system on mount
   useEffect(() => {
     const stored = localStorage.getItem("portfolio-theme") as Theme | null;
     const preferred = window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -42,18 +47,9 @@ export default function ThemeProvider({
     applyTheme(resolved);
   }, []);
 
-  const applyTheme = (t: Theme) => {
-    const root = document.documentElement;
-    if (t === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-  };
-
   const toggle = useCallback(() => {
     setTheme((prev) => {
-      const next: Theme = prev === "light" ? "dark" : "light";
+      const next: Theme = prev === "dark" ? "light" : "dark";
       applyTheme(next);
       localStorage.setItem("portfolio-theme", next);
       return next;

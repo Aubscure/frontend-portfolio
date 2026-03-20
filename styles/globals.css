@@ -1,0 +1,438 @@
+@import "tailwindcss";
+
+/* ─── Dark-mode variant (class-based) ───────────────────────────────────── */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─── Design Tokens ──────────────────────────────────────────────────────── */
+@theme {
+  /* Canvas & Surface */
+  --color-canvas: #0a0a0c;
+  --color-surface: #111115;
+  --color-surface-hi: #18181d;
+
+  /* Ink */
+  --color-ink: #f0ede8;
+  --color-ink-dim: rgba(240, 237, 232, 0.5);
+  --color-ink-ghost: rgba(240, 237, 232, 0.1);
+
+  /* Borders */
+  --color-border: rgba(240, 237, 232, 0.08);
+  --color-border-hi: rgba(240, 237, 232, 0.2);
+
+  /* Accents — JDM instrument palette */
+  --color-red: #ff1e1e; /* Taillight Red — primary accent      */
+  --color-amber: #ff8c00; /* Dashboard Amber — secondary         */
+  --color-sys-green: #39ff14; /* System-OK neon green — status LED   */
+  --color-red-glow: rgba(255, 30, 30, 0.18);
+  --color-amber-glow: rgba(255, 140, 0, 0.14);
+  --color-green-glow: rgba(57, 255, 20, 0.2);
+
+  /* Typography */
+  --font-display: "Barlow Condensed", "Impact", "Arial Narrow", sans-serif;
+  --font-sans: var(--font-geist-sans), "Helvetica Neue", sans-serif;
+  --font-mono:
+    var(--font-geist-mono), "JetBrains Mono", "Courier New", monospace;
+
+  /* Easing — mechanical, snap-in character */
+  --ease-mech: cubic-bezier(0.25, 1, 0.5, 1); /* tachometer snap     */
+  --ease-boot: cubic-bezier(0.16, 1, 0.3, 1); /* system boot reveal  */
+  --ease-snap: cubic-bezier(0.55, 0, 0.45, 1); /* hard cut in/out     */
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Base Layer ─────────────────────────────────────────────────────────── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    background-color: var(--color-canvas);
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+  }
+
+  /* Cursor: crosshair targeting reticle */
+  * {
+    box-sizing: border-box;
+    cursor: crosshair;
+  }
+  a,
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+
+  /* Text selection — red on white, technical */
+  ::selection {
+    background-color: var(--color-red);
+    color: #fff;
+  }
+
+  /* ── Noise / Carbon-fiber texture overlay ─ */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    opacity: 0.038;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── Scan-line overlay ─ */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.06) 2px,
+      rgba(0, 0, 0, 0.06) 4px
+    );
+    pointer-events: none;
+    z-index: 9998;
+  }
+}
+
+/* ─── Components ─────────────────────────────────────────────────────────── */
+@layer components {
+  /* ── HUD navigation frost glass ─ */
+  .hud-bar {
+    background: rgba(10, 10, 12, 0.82);
+    backdrop-filter: blur(12px) saturate(1.2);
+    -webkit-backdrop-filter: blur(12px) saturate(1.2);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /* ── Technical card — sharp-corner instrument panel ─ */
+  .panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    transition:
+      border-color 0.15s var(--ease-mech),
+      box-shadow 0.15s var(--ease-mech);
+  }
+  .panel:hover {
+    border-color: var(--color-red);
+    box-shadow:
+      0 0 0 1px var(--color-red),
+      0 0 24px var(--color-red-glow);
+  }
+
+  /* ── Red accent line — replaces hanko, instrument bezel ─ */
+  .bezel {
+    position: relative;
+  }
+  .bezel::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--color-red);
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.2s var(--ease-mech);
+  }
+  .bezel:hover::before,
+  .bezel.active::before {
+    transform: scaleY(1);
+  }
+
+  /* ── Telemetry label — ALL CAPS monospace ID ─ */
+  .telem-label {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-dim);
+  }
+
+  /* ── Status LED dot ─ */
+  .led {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-sys-green);
+    box-shadow:
+      0 0 6px var(--color-green-glow),
+      0 0 12px var(--color-green-glow);
+    animation: led-pulse 2.4s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  .led.amber {
+    background: var(--color-amber);
+    box-shadow:
+      0 0 6px var(--color-amber-glow),
+      0 0 12px var(--color-amber-glow);
+    animation: led-pulse-amber 1.6s ease-in-out infinite;
+  }
+  .led.red {
+    background: var(--color-red);
+    box-shadow:
+      0 0 6px var(--color-red-glow),
+      0 0 12px var(--color-red-glow);
+    animation: led-pulse-red 0.8s ease-in-out infinite;
+  }
+
+  /* ── Diagonal racing stripe (CSS only, no images) ─ */
+  .stripe-bg {
+    background-image: repeating-linear-gradient(
+      -55deg,
+      transparent,
+      transparent 18px,
+      rgba(255, 30, 30, 0.025) 18px,
+      rgba(255, 30, 30, 0.025) 36px
+    );
+  }
+
+  /* ── Dot-grid technical background ─ */
+  .dot-grid {
+    background-image: radial-gradient(
+      circle,
+      rgba(240, 237, 232, 0.045) 1px,
+      transparent 1px
+    );
+    background-size: 24px 24px;
+  }
+
+  /* ── Section divider — hairline ─ */
+  .hairline {
+    border: none;
+    border-top: 1px solid var(--color-border);
+  }
+
+  /* ── Tag / tech chip ─ */
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--color-border);
+    padding: 0.2rem 0.5rem;
+    color: var(--color-ink-dim);
+    transition:
+      border-color 0.12s var(--ease-mech),
+      color 0.12s var(--ease-mech);
+  }
+  .chip:hover {
+    border-color: var(--color-amber);
+    color: var(--color-amber);
+  }
+
+  /* ── Primary CTA button ─ */
+  .btn-primary {
+    display: inline-block;
+    padding: 0.65rem 1.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    background: var(--color-red);
+    color: #fff;
+    border: 1px solid var(--color-red);
+    transition:
+      background 0.12s var(--ease-mech),
+      color 0.12s var(--ease-mech),
+      box-shadow 0.12s var(--ease-mech),
+      transform 0.12s var(--ease-mech);
+    text-decoration: none;
+  }
+  .btn-primary:hover {
+    background: transparent;
+    color: var(--color-red);
+    box-shadow: 0 0 20px var(--color-red-glow);
+    transform: translateY(-2px);
+  }
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  /* ── Ghost button ─ */
+  .btn-ghost {
+    display: inline-block;
+    padding: 0.65rem 1.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--color-ink-dim);
+    border: 1px solid var(--color-border);
+    transition:
+      border-color 0.12s var(--ease-mech),
+      color 0.12s var(--ease-mech),
+      transform 0.12s var(--ease-mech);
+    text-decoration: none;
+  }
+  .btn-ghost:hover {
+    border-color: var(--color-ink);
+    color: var(--color-ink);
+    transform: translateY(-2px);
+  }
+
+  /* ── Skeleton shimmer (dark variant) ─ */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(240, 237, 232, 0.04) 25%,
+      rgba(240, 237, 232, 0.09) 50%,
+      rgba(240, 237, 232, 0.04) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+  }
+
+  /* ── Boot / scan-reveal animation ─ */
+  .boot-reveal {
+    animation: boot-scan 0.45s var(--ease-boot) both;
+  }
+
+  /* ── Counter readout (CSS-only, for static display) ─ */
+  .readout {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+}
+
+/* ─── Keyframes ──────────────────────────────────────────────────────────── */
+@layer utilities {
+  @keyframes led-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+  @keyframes led-pulse-amber {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.45;
+    }
+  }
+  @keyframes led-pulse-red {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.2;
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  @keyframes boot-scan {
+    0% {
+      clip-path: inset(0 100% 0 0);
+      opacity: 0;
+    }
+    60% {
+      opacity: 1;
+    }
+    100% {
+      clip-path: inset(0 0% 0 0);
+    }
+  }
+
+  @keyframes flicker {
+    0%,
+    89%,
+    91%,
+    93%,
+    100% {
+      opacity: 1;
+    }
+    90%,
+    92% {
+      opacity: 0.3;
+    }
+  }
+
+  @keyframes float-telem {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes stripe-scroll {
+    0% {
+      background-position: 0 0;
+    }
+    100% {
+      background-position: 60px 0;
+    }
+  }
+
+  /* Staggered boot entries (used via inline --delay var) */
+  .stagger-in {
+    animation: stagger-entry 0.5s var(--ease-boot) both;
+    animation-delay: var(--delay, 0ms);
+  }
+
+  @keyframes stagger-entry {
+    0% {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .flicker-in {
+    animation: flicker-entry 0.6s var(--ease-boot) both;
+    animation-delay: var(--delay, 0ms);
+  }
+
+  @keyframes flicker-entry {
+    0% {
+      opacity: 0;
+    }
+    20% {
+      opacity: 0.6;
+    }
+    30% {
+      opacity: 0.1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+    60% {
+      opacity: 0.2;
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+}

@@ -4,14 +4,14 @@ import { useRef } from "react";
 import Image from "next/image";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import TechIcon from "@/components/icons/TechIcon";
+import StatusLED from "@/components/ui/StatusLED";
+import { EASE_MECH } from "@/lib/constants";
 import type { ProjectData } from "@/src/types";
 
 interface Props {
   project: ProjectData;
   index: number;
 }
-
-const ease = [0.4, 0, 0.2, 1] as const;
 
 function ProjectMedia({
   mediaUrl,
@@ -21,18 +21,24 @@ function ProjectMedia({
   if (!mediaUrl) {
     return (
       <div
-        className="w-full flex items-center justify-center overflow-hidden"
-        style={{ aspectRatio: "16/9", background: "var(--color-peach-dim)" }}
+        className="w-full flex items-center justify-center stripe-bg overflow-hidden"
+        style={{
+          aspectRatio: "16/9",
+          background: "var(--color-surface-hi)",
+          borderBottom: "1px solid var(--color-border)",
+        }}
       >
         <span
-          className="select-none text-[2rem]"
           style={{
             fontFamily: "var(--font-display)",
-            color: "var(--color-hanko)",
-            opacity: 0.25,
+            fontSize: "4rem",
+            fontWeight: 900,
+            color: "var(--color-red)",
+            opacity: 0.1,
+            letterSpacing: "-0.05em",
           }}
         >
-          ◻
+          NULL
         </span>
       </div>
     );
@@ -43,7 +49,10 @@ function ProjectMedia({
   return (
     <div
       className="w-full overflow-hidden relative"
-      style={{ aspectRatio: "16/9" }}
+      style={{
+        aspectRatio: "16/9",
+        borderBottom: "1px solid var(--color-border)",
+      }}
     >
       {isVideo ? (
         <video
@@ -52,7 +61,7 @@ function ProjectMedia({
           loop
           muted
           playsInline
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
         />
       ) : (
         <Image
@@ -60,9 +69,20 @@ function ProjectMedia({
           alt={title}
           fill
           sizes="(max-width: 900px) 100vw, 33vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"
         />
       )}
+
+      {/* Scan-line overlay on image */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px)",
+          opacity: 0,
+          transition: "opacity 0.15s",
+        }}
+      />
     </div>
   );
 }
@@ -71,13 +91,13 @@ export default function ProjectCard({ project, index }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const rotateX = useSpring(useTransform(y, [-60, 60], [4, -4]), {
-    stiffness: 180,
-    damping: 28,
+  const rotateX = useSpring(useTransform(y, [-60, 60], [3, -3]), {
+    stiffness: 200,
+    damping: 30,
   });
-  const rotateY = useSpring(useTransform(x, [-60, 60], [-4, 4]), {
-    stiffness: 180,
-    damping: 28,
+  const rotateY = useSpring(useTransform(x, [-60, 60], [-3, 3]), {
+    stiffness: 200,
+    damping: 30,
   });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -87,6 +107,7 @@ export default function ProjectCard({ project, index }: Props) {
     y.set(e.clientY - rect.top - rect.height / 2);
   };
 
+  const unitId = `UNIT_${String(index + 1).padStart(3, "0")}`;
   const href = project.url ?? "#";
 
   return (
@@ -95,7 +116,7 @@ export default function ProjectCard({ project, index }: Props) {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.6, ease, delay: index * 0.08 }}
+      transition={{ duration: 0.45, ease: EASE_MECH, delay: index * 0.07 }}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => {
         x.set(0);
@@ -105,62 +126,113 @@ export default function ProjectCard({ project, index }: Props) {
         rotateX,
         rotateY,
         transformStyle: "preserve-3d",
-        perspective: 800,
+        perspective: 900,
       }}
-      className="hanko-line group relative overflow-hidden cursor-pointer"
+      className="panel group relative overflow-hidden cursor-pointer"
     >
+      {/* Header bar — unit ID + status */}
       <div
-        className="p-8 h-full transition-transform duration-250 group-hover:-translate-y-0.5"
-        style={{ background: "var(--color-canvas)" }}
+        className="flex items-center justify-between px-4 py-2.5"
+        style={{
+          background: "var(--color-surface-hi)",
+          borderBottom: "1px solid var(--color-border)",
+        }}
       >
-        <p
-          className="text-[0.68rem] mb-6"
-          style={{
-            fontFamily: "var(--font-mono)",
-            color: "var(--color-muted)",
-          }}
+        <div className="flex items-center gap-2">
+          <StatusLED variant="amber" />
+          <span
+            className="telem-label"
+            style={{ fontSize: "0.58rem", color: "var(--color-amber)" }}
+          >
+            {unitId}
+          </span>
+        </div>
+        <span
+          className="telem-label"
+          style={{ fontSize: "0.55rem", opacity: 0.4 }}
         >
-          {String(index + 1).padStart(2, "0")} /{" "}
-          {String(index + 1).padStart(2, "0")}
-        </p>
+          {project.linkChoice === "github" ? "SRC_AVAILABLE" : "LIVE_DEPLOY"}
+        </span>
+      </div>
 
-        <ProjectMedia
-          mediaUrl={project.mediaUrl}
-          mediaContentType={project.mediaContentType}
-          title={project.title}
-        />
+      {/* Media */}
+      <ProjectMedia
+        mediaUrl={project.mediaUrl}
+        mediaContentType={project.mediaContentType}
+        title={project.title}
+      />
 
-        <div className="flex flex-wrap gap-1.5 mt-5 mb-4">
+      {/* Content */}
+      <div className="p-5">
+        {/* Tech stack chips */}
+        <div className="flex flex-wrap gap-1.5 mb-4">
           {project.projectTechStack.map((tag) => (
-            <TechIcon key={tag} name={tag} size={12} showLabel />
+            <TechIcon key={tag} name={tag} size={11} showLabel />
           ))}
         </div>
 
+        {/* Title */}
         <h3
-          className="text-[1.1rem] font-semibold leading-[1.35] mb-3"
-          style={{ fontFamily: "var(--font-display)" }}
+          className="mb-2 leading-[1.2] uppercase"
+          style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 800,
+            fontSize: "1.3rem",
+            letterSpacing: "0.01em",
+            color: "var(--color-ink)",
+          }}
         >
           {project.title}
         </h3>
 
+        {/* Description */}
         <p
-          className="text-[0.8rem] leading-[1.7]"
-          style={{ color: "var(--color-muted)" }}
+          className="text-[0.8rem] leading-[1.7] mb-5"
+          style={{ color: "var(--color-ink-dim)" }}
         >
           {project.description}
         </p>
 
+        {/* CTA link */}
         <a
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-[0.7rem] tracking-widest uppercase mt-5 no-underline transition-all duration-200 group-hover:gap-3"
-          style={{ color: "var(--color-hanko)" }}
+          className="inline-flex items-center gap-2 no-underline transition-all duration-150 group-hover:gap-3"
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "0.65rem",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "var(--color-red)",
+          }}
         >
-          {project.linkChoice === "github" ? "View on GitHub" : "Visit Project"}{" "}
-          &rarr;
+          {project.linkChoice === "github" ? "VIEW_SRC" : "VISIT_UNIT"}
+          <span style={{ fontSize: "0.8rem" }}>→</span>
         </a>
       </div>
+
+      {/* Bottom accent line — grows on hover */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-[2px]"
+        style={{
+          background: "var(--color-red)",
+          transform: "scaleX(0)",
+          transformOrigin: "left",
+          transition: "transform 0.2s var(--ease-mech)",
+        }}
+        ref={(el) => {
+          if (!el) return;
+          const parent = el.closest(".group") as HTMLElement;
+          if (!parent) return;
+          parent.addEventListener("mouseenter", () => {
+            el.style.transform = "scaleX(1)";
+          });
+          parent.addEventListener("mouseleave", () => {
+            el.style.transform = "scaleX(0)";
+          });
+        }}
+      />
     </motion.div>
   );
 }

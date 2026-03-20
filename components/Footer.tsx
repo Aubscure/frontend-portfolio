@@ -1,6 +1,7 @@
 "use client";
 
 import SocialIcon from "@/components/icons/SocialIcon";
+import StatusLED from "@/components/ui/StatusLED";
 import type { ProfileData } from "@/src/types";
 
 interface Props {
@@ -17,40 +18,75 @@ export default function Footer({ profile }: Props) {
     socialLinks?.email && `mailto:${socialLinks.email}`,
   ].filter(Boolean) as string[];
 
+  const year = new Date().getFullYear();
+
   return (
     <footer
-      className="border-t px-10 py-12 max-w-[1200px] mx-auto flex items-center justify-between flex-wrap gap-6"
-      style={{ borderColor: "var(--color-border)" }}
+      className="mt-0"
+      style={{ borderTop: "1px solid var(--color-border)" }}
     >
-      <p
-        className="text-[0.82rem]"
-        style={{
-          fontFamily: "var(--font-display)",
-          color: "var(--color-muted)",
-        }}
-      >
-        &copy; {new Date().getFullYear()} {firstName} {lastName}
-      </p>
+      {/* Red bottom rule — instrument panel closing bezel */}
+      <div className="max-w-[1280px] mx-auto px-8 py-5 flex items-center justify-between flex-wrap gap-4">
+        {/* Left: System info */}
+        <div className="flex items-center gap-4">
+          <StatusLED variant="green" />
+          <div>
+            <p
+              className="telem-label"
+              style={{ fontSize: "0.58rem", color: "var(--color-ink-dim)" }}
+            >
+              {`${firstName.toUpperCase()}_${lastName.toUpperCase()} // PORTFOLIO_v1.0`}
+            </p>
+            <p
+              className="telem-label"
+              style={{ fontSize: "0.55rem", color: "var(--color-ink-ghost)" }}
+            >
+              &copy; {year} — ALL_RIGHTS_RESERVED
+            </p>
+          </div>
+        </div>
 
-      {links.length > 0 && (
-        <nav className="flex gap-5" aria-label="Footer social links">
-          {links.map((href) => (
-            <SocialIcon
-              key={href}
-              href={href}
-              size={18}
-              style={{ color: "var(--color-muted)" }}
-              className="transition-colors duration-200"
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.color = "var(--color-hanko)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.color = "var(--color-muted)")
-              }
-            />
-          ))}
-        </nav>
-      )}
+        {/* Center: Build info */}
+        <p
+          className="telem-label hidden md:block"
+          style={{ fontSize: "0.55rem", color: "var(--color-ink-ghost)" }}
+        >
+          BUILT_WITH: NEXT.JS // TAILWIND // SANITY_CMS
+        </p>
+
+        {/* Right: Social icons */}
+        {links.length > 0 && (
+          <nav
+            className="flex items-center gap-4"
+            aria-label="Footer social links"
+          >
+            {links.map((href) => (
+              <SocialIcon
+                key={href}
+                href={href}
+                size={16}
+                style={{ color: "var(--color-ink-dim)" }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.color = "var(--color-red)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.color = "var(--color-ink-dim)")
+                }
+              />
+            ))}
+          </nav>
+        )}
+      </div>
+
+      {/* Bottom accent strip */}
+      <div
+        style={{
+          height: "3px",
+          background:
+            "linear-gradient(to right, var(--color-red), var(--color-amber), transparent)",
+          opacity: 0.6,
+        }}
+      />
     </footer>
   );
 }

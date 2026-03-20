@@ -1,14 +1,16 @@
 /**
- * SocialIcon
- * Detects a social platform from a URL or mailto: string and renders
- * the matching SVG icon. Falls back to a globe icon for unknown URLs.
+ * components/icons/SocialIcon.tsx
  *
- * Usage:
- *   <SocialIcon href="https://github.com/username" />
- *   <SocialIcon href="mailto:hello@example.com" />
+ * Detects a social platform from a URL or mailto: string and renders
+ * the matching SVG icon. Platform detection is in lib/platform.ts.
  */
 
 import React from "react";
+import {
+  detectSocialPlatform,
+  SOCIAL_LABELS,
+  type SocialPlatform,
+} from "@/lib/platform";
 
 interface Props {
   href: string;
@@ -16,41 +18,12 @@ interface Props {
   className?: string;
   style?: React.CSSProperties;
   label?: string;
-  showLabel?: boolean; // Added this
+  showLabel?: boolean;
   onMouseEnter?: React.MouseEventHandler<HTMLAnchorElement>;
   onMouseLeave?: React.MouseEventHandler<HTMLAnchorElement>;
 }
 
-type Platform =
-  | "github"
-  | "linkedin"
-  | "instagram"
-  | "twitter"
-  | "facebook"
-  | "youtube"
-  | "dribbble"
-  | "email"
-  | "globe";
-
-function detectPlatform(href: string): Platform {
-  if (href.startsWith("mailto:")) return "email";
-  try {
-    const { hostname } = new URL(href);
-    const h = hostname.replace("www.", "");
-    if (h.includes("github.com")) return "github";
-    if (h.includes("linkedin.com")) return "linkedin";
-    if (h.includes("instagram.com")) return "instagram";
-    if (h.includes("twitter.com") || h.includes("x.com")) return "twitter";
-    if (h.includes("facebook.com")) return "facebook";
-    if (h.includes("youtube.com")) return "youtube";
-    if (h.includes("dribbble.com")) return "dribbble";
-  } catch {
-    // Not a valid URL
-  }
-  return "globe";
-}
-
-const ICONS: Record<Platform, React.ReactElement> = {
+const ICONS: Record<SocialPlatform, React.ReactElement> = {
   github: (
     <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.49.5.09.682-.217.682-.482 0-.237-.009-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.03-2.682-.103-.253-.448-1.27.097-2.646 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.547 1.376.203 2.394.1 2.646.641.698 1.028 1.591 1.028 2.682 0 3.841-2.337 4.687-4.565 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.577.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z" />
   ),
@@ -80,30 +53,18 @@ const ICONS: Record<Platform, React.ReactElement> = {
   ),
 };
 
-const LABELS: Record<Platform, string> = {
-  github: "GitHub",
-  linkedin: "LinkedIn",
-  instagram: "Instagram",
-  twitter: "Twitter / X",
-  facebook: "Facebook",
-  youtube: "YouTube",
-  dribbble: "Dribbble",
-  email: "Email",
-  globe: "Website",
-};
-
 export default function SocialIcon({
   href,
   size = 18,
   className = "",
   style,
   label,
-  showLabel = true, // Default to true
+  showLabel = false,
   onMouseEnter,
   onMouseLeave,
 }: Props) {
-  const platform = detectPlatform(href);
-  const ariaLabel = label ?? LABELS[platform];
+  const platform = detectSocialPlatform(href);
+  const ariaLabel = label ?? SOCIAL_LABELS[platform];
 
   return (
     <a
@@ -131,12 +92,7 @@ export default function SocialIcon({
         {ICONS[platform]}
       </svg>
 
-      {/* Conditionally render the text label to match your UI aesthetic */}
-      {showLabel && (
-        <span className="font-mono text-sm uppercase tracking-widest">
-          {ariaLabel}
-        </span>
-      )}
+      {showLabel && <span className="telem-label">{ariaLabel}</span>}
     </a>
   );
 }
