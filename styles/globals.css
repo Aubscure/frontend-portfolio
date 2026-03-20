@@ -3,29 +3,29 @@
 /* ─── Dark-mode variant (class-based) ───────────────────────────────────── */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ─── Design Tokens ──────────────────────────────────────────────────────── */
+/* ─── Design Tokens — LIGHT MODE DEFAULTS ───────────────────────────────── */
 @theme {
-  /* Canvas & Surface */
-  --color-canvas: #0a0a0c;
-  --color-surface: #111115;
-  --color-surface-hi: #18181d;
+  /* Canvas & Surface — warm white, like a race-spec white livery */
+  --color-canvas: #f5f2ee;
+  --color-surface: #edeae5;
+  --color-surface-hi: #e4e0da;
 
-  /* Ink */
-  --color-ink: #f0ede8;
-  --color-ink-dim: rgba(240, 237, 232, 0.5);
-  --color-ink-ghost: rgba(240, 237, 232, 0.1);
+  /* Ink — near-black on light */
+  --color-ink: #0e0e12;
+  --color-ink-dim: rgba(14, 14, 18, 0.5);
+  --color-ink-ghost: rgba(14, 14, 18, 0.12);
 
   /* Borders */
-  --color-border: rgba(240, 237, 232, 0.08);
-  --color-border-hi: rgba(240, 237, 232, 0.2);
+  --color-border: rgba(14, 14, 18, 0.1);
+  --color-border-hi: rgba(14, 14, 18, 0.28);
 
-  /* Accents — JDM instrument palette */
-  --color-red: #ff1e1e; /* Taillight Red — primary accent      */
-  --color-amber: #ff8c00; /* Dashboard Amber — secondary         */
-  --color-sys-green: #39ff14; /* System-OK neon green — status LED   */
-  --color-red-glow: rgba(255, 30, 30, 0.18);
-  --color-amber-glow: rgba(255, 140, 0, 0.14);
-  --color-green-glow: rgba(57, 255, 20, 0.2);
+  /* Accents — same across both modes */
+  --color-red: #e01010; /* slightly deeper red reads better on light */
+  --color-amber: #d97000; /* amber deepened for contrast on white      */
+  --color-sys-green: #1a9e00; /* muted neon green for light surfaces       */
+  --color-red-glow: rgba(224, 16, 16, 0.14);
+  --color-amber-glow: rgba(217, 112, 0, 0.12);
+  --color-green-glow: rgba(26, 158, 0, 0.16);
 
   /* Typography */
   --font-display: "Barlow Condensed", "Impact", "Arial Narrow", sans-serif;
@@ -34,10 +34,36 @@
     var(--font-geist-mono), "JetBrains Mono", "Courier New", monospace;
 
   /* Easing — mechanical, snap-in character */
-  --ease-mech: cubic-bezier(0.25, 1, 0.5, 1); /* tachometer snap     */
-  --ease-boot: cubic-bezier(0.16, 1, 0.3, 1); /* system boot reveal  */
-  --ease-snap: cubic-bezier(0.55, 0, 0.45, 1); /* hard cut in/out     */
+  --ease-mech: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-boot: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-snap: cubic-bezier(0.55, 0, 0.45, 1);
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Dark Mode Overrides ────────────────────────────────────────────────── */
+/*
+ * All components use var(--color-canvas) etc. These overrides flip every
+ * token when .dark is on the <html> element — no component-level changes needed.
+ */
+html.dark {
+  --color-canvas: #0a0a0c;
+  --color-surface: #111115;
+  --color-surface-hi: #18181d;
+
+  --color-ink: #f0ede8;
+  --color-ink-dim: rgba(240, 237, 232, 0.5);
+  --color-ink-ghost: rgba(240, 237, 232, 0.1);
+
+  --color-border: rgba(240, 237, 232, 0.08);
+  --color-border-hi: rgba(240, 237, 232, 0.2);
+
+  /* Restore full-brightness accents for dark surfaces */
+  --color-red: #ff1e1e;
+  --color-amber: #ff8c00;
+  --color-sys-green: #39ff14;
+  --color-red-glow: rgba(255, 30, 30, 0.18);
+  --color-amber-glow: rgba(255, 140, 0, 0.14);
+  --color-green-glow: rgba(57, 255, 20, 0.2);
 }
 
 /* ─── Base Layer ─────────────────────────────────────────────────────────── */
@@ -55,6 +81,9 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     overflow-x: hidden;
+    transition:
+      background-color 0.25s var(--ease-smooth),
+      color 0.25s var(--ease-smooth);
   }
 
   /* Cursor: crosshair targeting reticle */
@@ -68,21 +97,25 @@
     cursor: pointer;
   }
 
-  /* Text selection — red on white, technical */
+  /* Text selection — red on white */
   ::selection {
     background-color: var(--color-red);
     color: #fff;
   }
 
-  /* ── Noise / Carbon-fiber texture overlay ─ */
+  /* ── Noise texture — lighter opacity on light surfaces ─ */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
-    opacity: 0.038;
+    opacity: 0.028;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 9999;
+    transition: opacity 0.25s var(--ease-smooth);
+  }
+  html.dark body::before {
+    opacity: 0.04;
   }
 
   /* ── Scan-line overlay ─ */
@@ -94,40 +127,54 @@
       0deg,
       transparent,
       transparent 2px,
-      rgba(0, 0, 0, 0.06) 2px,
-      rgba(0, 0, 0, 0.06) 4px
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 4px
     );
     pointer-events: none;
     z-index: 9998;
+  }
+  html.dark body::after {
+    background-image: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.06) 2px,
+      rgba(0, 0, 0, 0.06) 4px
+    );
   }
 }
 
 /* ─── Components ─────────────────────────────────────────────────────────── */
 @layer components {
-  /* ── HUD navigation frost glass ─ */
+  /* ── HUD navigation — light: crisp white glass; dark: smoked black ─ */
   .hud-bar {
-    background: rgba(10, 10, 12, 0.82);
-    backdrop-filter: blur(12px) saturate(1.2);
-    -webkit-backdrop-filter: blur(12px) saturate(1.2);
+    background: rgba(245, 242, 238, 0.88);
+    backdrop-filter: blur(12px) saturate(1.3);
+    -webkit-backdrop-filter: blur(12px) saturate(1.3);
     border-bottom: 1px solid var(--color-border);
+    transition: background 0.25s var(--ease-smooth);
+  }
+  html.dark .hud-bar {
+    background: rgba(10, 10, 12, 0.88);
   }
 
-  /* ── Technical card — sharp-corner instrument panel ─ */
+  /* ── Technical card — instrument panel ─ */
   .panel {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     transition:
       border-color 0.15s var(--ease-mech),
-      box-shadow 0.15s var(--ease-mech);
+      box-shadow 0.15s var(--ease-mech),
+      background 0.25s var(--ease-smooth);
   }
   .panel:hover {
     border-color: var(--color-red);
     box-shadow:
       0 0 0 1px var(--color-red),
-      0 0 24px var(--color-red-glow);
+      0 0 20px var(--color-red-glow);
   }
 
-  /* ── Red accent line — replaces hanko, instrument bezel ─ */
+  /* ── Bezel — left-edge red accent line ─ */
   .bezel {
     position: relative;
   }
@@ -148,7 +195,7 @@
     transform: scaleY(1);
   }
 
-  /* ── Telemetry label — ALL CAPS monospace ID ─ */
+  /* ── Telemetry label ─ */
   .telem-label {
     font-family: var(--font-mono);
     font-size: 0.62rem;
@@ -184,8 +231,17 @@
     animation: led-pulse-red 0.8s ease-in-out infinite;
   }
 
-  /* ── Diagonal racing stripe (CSS only, no images) ─ */
+  /* ── Diagonal racing stripe ─ */
   .stripe-bg {
+    background-image: repeating-linear-gradient(
+      -55deg,
+      transparent,
+      transparent 18px,
+      rgba(224, 16, 16, 0.04) 18px,
+      rgba(224, 16, 16, 0.04) 36px
+    );
+  }
+  html.dark .stripe-bg {
     background-image: repeating-linear-gradient(
       -55deg,
       transparent,
@@ -195,23 +251,30 @@
     );
   }
 
-  /* ── Dot-grid technical background ─ */
+  /* ── Dot-grid — dark dots on light, dim dots on dark ─ */
   .dot-grid {
+    background-image: radial-gradient(
+      circle,
+      rgba(14, 14, 18, 0.08) 1px,
+      transparent 1px
+    );
+    background-size: 24px 24px;
+  }
+  html.dark .dot-grid {
     background-image: radial-gradient(
       circle,
       rgba(240, 237, 232, 0.045) 1px,
       transparent 1px
     );
-    background-size: 24px 24px;
   }
 
-  /* ── Section divider — hairline ─ */
+  /* ── Section divider ─ */
   .hairline {
     border: none;
     border-top: 1px solid var(--color-border);
   }
 
-  /* ── Tag / tech chip ─ */
+  /* ── Tech chip ─ */
   .chip {
     font-family: var(--font-mono);
     font-size: 0.6rem;
@@ -225,8 +288,8 @@
       color 0.12s var(--ease-mech);
   }
   .chip:hover {
-    border-color: var(--color-amber);
-    color: var(--color-amber);
+    border-color: var(--color-red);
+    color: var(--color-red);
   }
 
   /* ── Primary CTA button ─ */
@@ -280,24 +343,19 @@
     transform: translateY(-2px);
   }
 
-  /* ── Skeleton shimmer (dark variant) ─ */
+  /* ── Skeleton shimmer ─ */
   .skeleton {
     background: linear-gradient(
       90deg,
-      rgba(240, 237, 232, 0.04) 25%,
-      rgba(240, 237, 232, 0.09) 50%,
-      rgba(240, 237, 232, 0.04) 75%
+      var(--color-surface) 25%,
+      var(--color-surface-hi) 50%,
+      var(--color-surface) 75%
     );
     background-size: 200% 100%;
     animation: shimmer 1.4s infinite;
   }
 
-  /* ── Boot / scan-reveal animation ─ */
-  .boot-reveal {
-    animation: boot-scan 0.45s var(--ease-boot) both;
-  }
-
-  /* ── Counter readout (CSS-only, for static display) ─ */
+  /* ── Readout — tabular numerals ─ */
   .readout {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
@@ -371,26 +429,6 @@
     }
   }
 
-  @keyframes float-telem {
-    0%,
-    100% {
-      transform: translateY(0px);
-    }
-    50% {
-      transform: translateY(-8px);
-    }
-  }
-
-  @keyframes stripe-scroll {
-    0% {
-      background-position: 0 0;
-    }
-    100% {
-      background-position: 60px 0;
-    }
-  }
-
-  /* Staggered boot entries (used via inline --delay var) */
   .stagger-in {
     animation: stagger-entry 0.5s var(--ease-boot) both;
     animation-delay: var(--delay, 0ms);

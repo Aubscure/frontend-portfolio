@@ -55,7 +55,7 @@ const ICONS: Record<SocialPlatform, React.ReactElement> = {
 
 export default function SocialIcon({
   href,
-  size = 18,
+  size = 30,
   className = "",
   style,
   label,

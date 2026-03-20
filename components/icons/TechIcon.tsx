@@ -1,160 +1,145 @@
 /**
  * components/icons/TechIcon.tsx
  *
- * Detects a tech stack entry from a name or URL and renders
- * the matching SVG icon. Tech detection is in lib/platform.ts.
+ * Renders technology icons using official SVG paths from `simple-icons`.
+ * https://simpleicons.org
+ *
+ * Instead of named imports (which break when simple-icons renames slugs
+ * between major versions), we import the entire namespace and do a runtime
+ * lookup by slug key. This means:
+ *   - Adding a new tech = one line in SLUG_MAP
+ *   - Version bumps that rename slugs = fix one string, not an import
+ *   - Missing icons degrade gracefully to a text chip, never throw
+ *
+ * Slug reference: https://github.com/simple-icons/simple-icons/blob/develop/slugs.md
+ * Run `Object.keys(SI).filter(k => k.startsWith('si'))` in a Node REPL to
+ * inspect all available slugs in your installed version.
  */
 
 import React from "react";
+import * as SI from "simple-icons";
+import type { SimpleIcon } from "simple-icons";
+
 import { detectTech, TECH_LABELS, TECH_URLS, type Tech } from "@/lib/platform";
 
 interface Props {
   name: string;
   size?: number;
   className?: string;
-  style?: React.CSSProperties;
   label?: string;
   showLabel?: boolean;
-  onMouseEnter?: React.MouseEventHandler<HTMLAnchorElement>;
-  onMouseLeave?: React.MouseEventHandler<HTMLAnchorElement>;
 }
 
-const ICONS: Record<Tech, React.ReactElement> = {
-  react: (
-    <path d="M12 14.163c1.235 0 2.237-.997 2.237-2.227 0-1.23-1.002-2.227-2.237-2.227s-2.237.997-2.237 2.227c0 1.23 1.002 2.227 2.237 2.227Zm0-7.76c2.514 0 4.726.363 6.288.952.788.297 1.424.655 1.853 1.058.446.42.67.835.67 1.238 0 .404-.224.818-.67 1.238-.429.403-1.065.761-1.853 1.058-1.562.589-3.774.952-6.288.952s-4.726-.363-6.288-.952c-.788-.297-1.424-.655-1.853-1.058C3.413 12.22 3.19 11.806 3.19 11.402c0-.403.223-.818.669-1.238.429-.403 1.065-.761 1.853-1.058 1.562-.589 3.774-.952 6.288-.952Zm0 11.194c-2.166 1.31-4.222 2.163-5.784 2.41-.788.125-1.517.143-2.093.035-.6-.113-1.023-.36-1.225-.701-.202-.342-.17-.812.054-1.384.215-.55.616-1.158 1.153-1.826.954-1.186 2.395-2.724 4.56-4.034 2.166-1.31 4.222-2.163 5.784-2.41.788-.125 1.517-.143 2.093-.035.6.113 1.023.36 1.225.701.202.342.17.812-.054 1.384-.215.55-.616 1.158-1.153 1.826-.954 1.186-2.395 2.724-4.56 4.034Zm0-11.194c2.166 1.31 3.607 2.848 4.56 4.034.537.668.938 1.276 1.153 1.826.224.572.256 1.042.054 1.384-.202.341-.625.588-1.225.701-.576.108-1.305.09-2.093-.035-1.562-.247-3.618-1.1-5.784-2.41-2.165-1.31-3.606-2.848-4.56-4.034-.537-.668-.938-1.276-1.153-1.826-.224-.572-.256-1.042-.054-1.384.202-.341.625-.588 1.225-.701.576-.108 1.305-.09 2.093.035 1.562.247 3.618 1.1 5.784 2.41Z" />
-  ),
-  nextjs: (
-    <>
-      <path d="M12 2C6.477 2 2 6.477 2 12c0 5.02 3.692 9.177 8.5 9.878V8.5h3v13.378C18.308 21.177 22 17.02 22 12c0-5.523-4.477-10-10-10Z" />
-      <path d="M15.5 8.5h2.2l3.1 6.2V18h-1.9l-3.4-6.8V8.5Z" />
-    </>
-  ),
-  vue: (
-    <path d="M24 1.61h-4.69L12 14.27 4.69 1.61H0L12 22.39 24 1.61Zm-8.86 0L12 7.05 8.86 1.61H5.43L12 12.99 18.57 1.61h-3.43Z" />
-  ),
-  nuxt: (
-    <path d="M15.44 3.7c-.52-.88-1.8-.88-2.32 0L.22 23.36c-.52.88.11 2.01 1.16 2.01h21.24c1.05 0 1.68-1.13 1.16-2.01L15.44 3.7zm-2.32 1.5l10.5 17.65h-5.12l-5.38-9.05-3.73 6.28H4.27l8.85-14.88z" />
-  ),
-  svelte: (
-    <path d="M13.58 2.06c-2.62-.5-4.76.27-5.87 2.1-.72 1.18-.88 2.77-.42 4.02.4 1.1 1.22 1.92 2.5 2.5l2.53 1.15c1.43.65 1.9 1.07 1.9 1.73 0 .87-.82 1.43-2.08 1.43-1.33 0-2.53-.5-3.67-1.54l-1.67 2.3c1.48 1.28 3.25 1.9 5.39 1.9 3.52 0 5.87-1.83 5.87-4.58 0-1.07-.34-1.95-1.03-2.68-.6-.63-1.32-1.06-2.62-1.64l-2.27-1.03c-1.32-.6-1.76-.98-1.76-1.56 0-.74.74-1.24 1.84-1.24 1.02 0 2 .33 3.04 1.01l1.52-2.4c-1.29-.9-2.76-1.4-4.4-1.71Z" />
-  ),
-  angular: (
-    <path d="M12 2 3.2 5.18l1.34 11.64L12 22l7.46-5.18L20.8 5.18 12 2Zm0 2.2 5.43 12.18h-2.03l-1.1-2.72H9.68l-1.1 2.72H6.55L12 4.2Zm0 4.21-1.56 3.87h3.12L12 8.41Z" />
-  ),
-  laravel: (
-    <path d="M7.57 3.43 12 1l4.43 2.43v5.14L12 11 7.57 8.57V3.43Zm9.86 5.7L22 11.57v5.14L17.43 19 13 16.71v-5.14l4.43-2.44ZM2 11.57l4.43-2.44L10.86 11v5.14L6.43 18.57 2 16.71v-5.14Zm10 5.72 4.43 2.43v-5.14L12 12.14l-4.43 2.44v5.14L12 17.29Z" />
-  ),
-  php: (
-    <path d="M12 4C6.48 4 2 7.58 2 12s4.48 8 10 8 10-3.58 10-8-4.48-8-10-8Zm-4 4h3.5c1.93 0 3.5 1.34 3.5 3s-1.57 3-3.5 3H10v2H8V8Zm2 4h1.5c.83 0 1.5-.45 1.5-1s-.67-1-1.5-1H10v2Zm6-4h3c1.66 0 3 1.34 3 3s-1.34 3-3 3h-1v2h-2V8Zm2 4h1c.55 0 1-.45 1-1s-.45-1-1-1h-1v2Z" />
-  ),
-  nodejs: (
-    <path d="M12 2 4 6.5v11L12 22l8-4.5v-11L12 2Zm0 2.3 5.9 3.32V16.4L12 19.72 6.1 16.4V7.62L12 4.3Zm-2.02 4.13h2.04v7.14H9.98V8.43Zm4.04 0h2.04c1.1 0 1.98.88 1.98 1.97v3.2c0 1.09-.88 1.97-1.98 1.97h-2.04V8.43Zm2.04 1.79v3.56h.18c.1 0 .18-.08.18-.18v-3.2a.18.18 0 0 0-.18-.18h-.18Z" />
-  ),
-  express: (
-    <path d="M3 12c0-5 4-9 9-9 4.55 0 8.31 3.37 8.92 7.75H14.5l1.55-2.1h-2.6l-1.56 2.1H7.86c.5-2.68 2.86-4.75 5.64-4.75 1.62 0 3.1.68 4.16 1.78l1.84-1.69A8.47 8.47 0 0 0 13.5 4C8.81 4 5 7.81 5 12s3.81 8 8.5 8c2.53 0 4.8-1.1 6.36-2.85l-1.95-1.58A6.47 6.47 0 0 1 13.5 18c-2.88 0-5.3-2.17-5.7-5h14.98c.01-.17.02-.33.02-.5 0-.17-.01-.33-.02-.5H3Z" />
-  ),
-  fastapi: (
-    <path d="M12 2 4 7v10l8 5 8-5V7l-8-5Zm1 4v7.59l3.3-3.29 1.4 1.41L12 17.41 6.3 11.7l1.4-1.41L11 13.59V6h2Z" />
-  ),
-  python: (
-    <path d="M12.01 2c-2.14 0-4.18.19-5.96.5C3.4 3 2 4.8 2 7.14v2.2h8v.74H2v3.05C2 15.5 3.96 17 6.06 17h3.28v-1.1H4.42a1.4 1.4 0 0 1-1.4-1.4v-2.8H12V6.22c0-2.33-1.98-4.22-4.41-4.22h4.42Zm-2.2 2.03a.81.81 0 1 1 0 1.62.81.81 0 0 1 0-1.62ZM12 22c2.14 0 4.18-.19 5.96-.5 2.65-.5 4.05-2.3 4.05-4.64v-2.2h-8v-.74h8v-3.05C22 8.5 20.04 7 17.94 7h-3.28v1.1h4.92a1.4 1.4 0 0 1 1.4 1.4v2.8H12v5.48c0 2.33 1.98 4.22 4.41 4.22H12Zm2.19-2.03a.81.81 0 1 1 0-1.62.81.81 0 0 1 0 1.62Z" />
-  ),
-  typescript: (
-    <path d="M3 3h18v18H3V3Zm10.36 8.18h-2.18V9.73h6.01v1.45H15v5.09h-1.64v-5.09Zm-5.9 2.18c.35.6.87 1 1.64 1 .64 0 1.05-.32 1.05-.76 0-.53-.42-.71-1.13-1.02l-.39-.17c-1.13-.48-1.88-1.08-1.88-2.35 0-1.17.89-2.06 2.29-2.06 1 0 1.71.35 2.22 1.25l-1.22.78c-.27-.48-.56-.67-1-.67-.45 0-.74.29-.74.67 0 .47.29.66.97.95l.39.17c1.33.57 2.08 1.15 2.08 2.46 0 1.41-1.11 2.18-2.6 2.18-1.46 0-2.4-.7-2.86-1.62l1.18-.81Z" />
-  ),
-  javascript: (
-    <path d="M3 3h18v18H3V3Zm9.9 10.55c.27.44.52.81 1.12.81.57 0 .93-.22.93-1.08V8.5h1.82v4.8c0 1.94-1.14 2.82-2.8 2.82-1.5 0-2.37-.77-2.81-1.7l1.74-1.05Zm-6.6-.2c.35.62.67 1.15 1.44 1.15.74 0 1.22-.37 1.22-.88 0-.61-.48-.82-1.3-1.18l-.45-.19c-1.29-.55-2.15-1.25-2.15-2.72 0-1.35 1.03-2.39 2.64-2.39 1.15 0 1.98.4 2.57 1.45l-1.41.91c-.31-.55-.64-.77-1.16-.77-.53 0-.86.33-.86.77 0 .54.33.76 1.1 1.09l.45.19c1.52.65 2.38 1.32 2.38 2.83 0 1.62-1.27 2.5-2.99 2.5-1.68 0-2.76-.8-3.29-1.84l1.41-.92Z" />
-  ),
-  tailwind: (
-    <path d="M12 6.5c-2.67 0-4.33 1.33-5 4 1-.67 1.92-.92 2.75-.75.47.1.9.3 1.3.6.64.48 1.16 1.08 2.07 1.08 1.33 0 2.33-.67 3-2-1 .67-1.92.92-2.75.75-.47-.1-.9-.3-1.3-.6-.64-.48-1.16-1.08-2.07-1.08-1.33 0-2.33.67-3 2 .67-2.67 2.33-4 5-4 1.87 0 3.31.65 4.33 1.95.55.7.97 1.55 1.27 2.55-.67 2.67-2.33 4-5 4-1.87 0-3.31-.65-4.33-1.95-.55-.7-.97-1.55-1.27-2.55.67 2.67 2.33 4 5 4 2.67 0 4.33-1.33 5-4-1 .67-1.92.92-2.75.75-.47-.1-.9-.3-1.3-.6-.64-.48-1.16-1.08-2.07-1.08-1.33 0-2.33.67-3 2 .67-2.67 2.33-4 5-4Z" />
-  ),
-  mysql: (
-    <path d="M4 18c2.2-1.7 3.85-2.55 4.95-2.55.65 0 1.14.19 1.47.58.2.24.36.58.48 1.04.13.51.22 1.01.27 1.5h1.65c-.08-.92-.25-1.8-.5-2.61-.24-.79-.61-1.46-1.12-2-.67-.7-1.56-1.06-2.65-1.06-1.6 0-3.34.74-5.22 2.22L4 18Zm8.92-6.42c.42-1.27 1.03-2.34 1.82-3.2.86-.95 1.9-1.58 3.1-1.89.67-.17 1.39-.23 2.16-.2-.41.35-.8.73-1.16 1.15-.63.72-1.17 1.5-1.6 2.36-.38.75-.66 1.52-.85 2.31-.42-.1-.93-.15-1.53-.15-.56 0-1.2.05-1.94.15ZM6.18 8.35c.98-.6 2.07-.98 3.27-1.12.59-.07 1.22-.09 1.88-.05-.66.66-1.2 1.38-1.64 2.16-.36.65-.63 1.32-.82 2.01-.64.07-1.23.2-1.76.38-.77.27-1.47.66-2.11 1.18.09-1.88.48-3.4 1.18-4.56Z" />
-  ),
-  postgres: (
-    <path d="M12 2c-2.9 0-5.6 1.6-5.6 5.3v6.4c0 2.2 1.2 4.3 3.3 5.4l.5-2.1c-1.1-.7-1.8-1.9-1.8-3.2V7.3c0-2.1 1.5-3.4 3.6-3.4s3.6 1.3 3.6 3.4v6.5c0 1.3-.7 2.5-1.8 3.2l.5 2.1c2.1-1.1 3.3-3.2 3.3-5.4V7.3C17.6 3.6 14.9 2 12 2Zm-2.4 6.2c0-.8.7-1.5 1.5-1.5h1.8c.8 0 1.5.7 1.5 1.5v2.2c0 .8-.7 1.5-1.5 1.5h-1.8c-.8 0-1.5-.7-1.5-1.5V8.2Z" />
-  ),
-  redis: (
-    <path d="M4 7.5 12 4l8 3.5v2.3L12 13 4 9.8V7.5Zm0 4.2L12 15l8-3.3V14L12 17.5 4 14v-2.3Zm0 4.2L12 19l8-3.1V18L12 21.5 4 18v-2.1Z" />
-  ),
-  mongodb: (
-    <path d="M12 2c1.7 2.1 3 4.4 3.8 6.9.75 2.34 1.13 4.44 1.13 6.3 0 3.54-1.8 5.87-4.93 6.81v-5.48c.78-.55 1.4-1.28 1.87-2.18.55-1.06.83-2.22.83-3.49 0-1.08-.2-2.23-.6-3.44A19.4 19.4 0 0 0 12 2Zm0 20c-3.13-.94-4.93-3.27-4.93-6.81 0-1.86.38-3.96 1.13-6.3C9 6.4 10.3 4.1 12 2v5.51c-.4 1.2-.6 2.34-.6 3.43 0 1.27.28 2.43.83 3.49.47.9 1.09 1.63 1.77 2.18V22Z" />
-  ),
-  docker: (
-    <path d="M7 11.5h2v2H7v-2Zm2.5 0h2v2h-2v-2Zm2.5 0h2v2h-2v-2Zm2.5 0h2v2h-2v-2ZM7 9h2v2H7V9Zm2.5 0h2v2h-2V9Zm2.5 0h2v2h-2V9Zm2.5 0h2v2h-2V9Zm2.75 2c.48-1.5.12-2.87-.6-4l1.47-1.08c1.02 1.4 1.56 3.18 1.3 4.96.84.16 1.75.63 2.08 1.08.16.22.28.5.28.8 0 2.9-2.1 5.2-6.7 5.2-5.38 0-9.08-2.53-9.08-7.26 0-.24.02-.47.06-.7H17.25Z" />
-  ),
-  git: (
-    <path d="M22 11.5 12.5 2a1.7 1.7 0 0 0-2.4 0L8.12 3.98l2.5 2.5a2.02 2.02 0 0 1 2.56 2.57l2.41 2.41a2.03 2.03 0 1 1-1.22 1.15l-2.25-2.24v5.9a2.03 2.03 0 1 1-1.67 0V10.8a2.02 2.02 0 0 1-1.1-2.65L8.94 5.73 2 12.67a1.7 1.7 0 0 0 0 2.4l9.5 9.5a1.7 1.7 0 0 0 2.4 0l8.1-8.1a1.7 1.7 0 0 0 0-2.4Z" />
-  ),
-  github: (
-    <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.49.5.09.682-.217.682-.482 0-.237-.009-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.03-2.682-.103-.253-.448-1.27.097-2.646 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.547 1.376.203 2.394.1 2.646.641.698 1.028 1.591 1.028 2.682 0 3.841-2.337 4.687-4.565 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.577.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z" />
-  ),
-  swift: (
-    <path d="M19.89 15.49c-.22.53-.53 1-.94 1.42-1.16 1.2-3.04 1.45-5.2.67-1.7-.6-3.64-1.84-5.52-3.5 1.8 2.5 4.24 4.34 6.53 5.17 2.3.84 4.3.58 5.54-.7.45-.46.8-1.02 1.02-1.66-.3-.26-.79-.75-1.43-1.4ZM18.2 13.83c-1.59-1.2-3.23-2.3-4.9-3.32 1.16 1.37 2.12 2.77 2.88 4.13 1.32.12 2.34-.08 3.01-.81.14-.15.26-.33.35-.52-.28-.28-.73-.75-1.34-1.35ZM12.37 2c1.1 1.8 2.13 4.18 2.74 6.79-1.47-1.3-3.18-2.55-5.14-3.71 1.18 1.44 2.3 3.2 3.27 5.15-2.7-1.53-5.48-2.8-7.77-3.64 1.92 1.48 4.34 3.69 6.5 6.22-1.85-.99-3.57-1.77-5.04-2.29 2.7 2.2 5.38 3.97 7.76 5.03 2.44 1.08 4.56 1.37 5.96-.08 1.29-1.34 1.24-3.62.36-6.18-.9-2.63-2.69-5.26-5.34-7.29-.37-.28-.76-.54-1.14-.78Z" />
-  ),
-  kotlin: (
-    <path d="M4 20 20 4v16H4Zm0-16h8L4 12V4Zm9.5 0H20v6.5L13.5 4ZM4 13.5 10.5 20H4v-6.5Z" />
-  ),
-  graphql: (
-    <path d="m12 2.5 2.27 1.31v2.63L12 7.75 9.73 6.44V3.81L12 2.5Zm-6.5 4 2.27 1.31v2.63L5.5 11.75 3.23 10.44V7.81L5.5 6.5Zm13 0 2.27 1.31v2.63l-2.27 1.31-2.27-1.31V7.81L18.5 6.5ZM12 9 14.27 10.31v3.38L12 15l-2.27-1.31v-3.38L12 9Zm-6.5 5 2.27 1.31v2.63L5.5 19.25l-2.27-1.31v-2.63L5.5 14Zm13 0 2.27 1.31v2.63l-2.27 1.31-2.27-1.31v-2.63L18.5 14Zm-5.5 1.25 2.27 1.31v2.63L13 20.5l-2.27-1.31v-2.63L13 15.25Zm-1-7.5h1v11h-1v-11Zm-4.72 1.77.5-.87 9.52 5.5-.5.87-9.52-5.5Zm0 4.96 9.52-5.5.5.87-9.52 5.5-.5-.87Z" />
-  ),
-  sanity: (
-    <path d="M4 16.5c2.2 1.9 4.86 2.85 7.96 2.85 3.76 0 6.34-1.55 6.34-4.23 0-2.34-1.47-3.52-4.92-4.35l-1.84-.44c-2-.47-2.73-.95-2.73-1.97 0-.95.92-1.61 2.45-1.61 1.57 0 3.08.48 4.73 1.47l1.3-2.81c-1.84-1.08-3.93-1.65-6.02-1.65-3.55 0-5.98 1.75-5.98 4.52 0 2.27 1.4 3.55 4.6 4.3l1.9.44c2.1.48 2.93.93 2.93 2.02 0 1.08-1.02 1.73-2.89 1.73-1.84 0-3.72-.57-5.45-1.72L4 16.5Z" />
-  ),
-  framer: (
-    <path d="M6 2h12v6h-6l6 6v8l-6-6v6H6V2Zm6 6h-2.59L12 10.59V8Zm0 8v-2.59L9.41 16H12Z" />
-  ),
-  figma: (
-    <path d="M10 2a4 4 0 0 1 4 4v2h-4a4 4 0 1 1 0-8Zm0 8h4v4h-4a4 4 0 1 1 0-4Zm0 6h4v2a4 4 0 1 1-4-4Zm4-8h0a4 4 0 1 1 0-8h0a4 4 0 1 1 0 8Zm0 6h0a4 4 0 1 1 0-8h0a4 4 0 1 1 0 8Z" />
-  ),
-  d3: (
-    <path d="M8 4h4.5c4.14 0 7.5 3.36 7.5 7.5S16.64 19 12.5 19H8V4Zm2 2v11h2.3c2.9 0 5.2-2.35 5.2-5.5S15.2 6 12.3 6H10Zm-6 1h2v10H4V7Z" />
-  ),
-  aws: (
-    <path d="M6.2 16.5c1.8 1.3 4.2 2.1 6.4 2.1 2 0 4.2-.5 6.3-1.6.3-.2.6.2.3.5-1.8 1.6-4.4 2.6-7 2.6-2.7 0-5.4-.9-7.3-2.5-.3-.2 0-.6.3-.4Zm12.6-.9c-.2-.2-1.3-.1-1.8 0-.2 0-.3-.1-.1-.3 1.2-.8 3.1-.6 3.4-.3.3.3 0 2.2-.8 3.1-.1.1-.3.1-.2-.1.3-.8.6-2.3.5-2.4ZM6.8 13.4c-.3-.2-.3-.5 0-.7l1.3-.9c.3-.2.8-.2 1.1 0l1.1.8 3.4-2.6c.3-.2.8-.2 1.1 0l1.2.8 2.8-2.2c.3-.2.7 0 .7.4v4.7c0 .4-.4.6-.7.4l-2.8-2.2-1.2.8c-.3.2-.8.2-1.1 0l-1.2-.8-3.4 2.6c-.3.2-.8.2-1.1 0l-1.2-.9-1.2.8Z" />
-  ),
-  vercel: <path d="M12 3 22 20H2L12 3Z" />,
-  vite: (
-    <path d="M21.64 4.36 13.3 20.86a1.47 1.47 0 0 1-2.6 0L2.36 4.36a.82.82 0 0 1 .97-1.16l8.86 2.54a.82.82 0 0 0 .45 0L20.67 3.2a.82.82 0 0 1 .97 1.16ZM12 8.2l-3.1 6.05 1.76-.5L12 11l1.34 2.75 1.76.5L12 8.2Z" />
-  ),
-  mui: (
-    <path d="M3 6.75 12 2l9 4.75v10.5L12 22l-9-4.75V6.75Zm9-1.72L6 8.28v7.44l6 3.25 6-3.25V8.28l-6-3.25Zm0 2.56 3.75 2.03v4.76L12 16.41l-3.75-2.03V9.62L12 7.59Zm0 1.7-2.25 1.22v2.98L12 14.71l2.25-1.22v-2.98L12 9.29Z" />
-  ),
-  inertia: <path d="M14.5 2 6 12.13h4L9.5 22 18 11.87h-4L14.5 2Z" />,
-  html: (
-    <path d="M1.5 0h21l-1.91 21.56L11.97 24l-8.56-2.44L1.5 0zm17.09 4.16l-.23-2.62H4.63l.54 6.14h10.95l-.32 3.56-4.8 1.32-4.84-1.32-.17-1.9h-3.34l.3 4.09 8.01 2.22 7.97-2.22.6-6.74H8.16l-.16-1.79h9.59z" />
-  ),
+/**
+ * Maps our internal Tech keys to simple-icons slug strings.
+ * The runtime lookup is: SI[`si${slug}`] — so "Nextdotjs" → SI.siNextdotjs.
+ * To find the correct slug for any brand, check slugs.md linked above or
+ * run: Object.keys(SI).find(k => k.toLowerCase().includes('yourtech'))
+ */
+const SLUG_MAP: Record<Tech, string> = {
+  react: "React",
+  nextjs: "Nextdotjs",
+  vue: "Vuedotjs",
+  nuxt: "Nuxt", // was siNuxtdotjs in older versions → siNuxt
+  svelte: "Svelte",
+  angular: "Angular",
+  laravel: "Laravel",
+  php: "Php",
+  nodejs: "Nodedotjs",
+  express: "Express",
+  fastapi: "Fastapi",
+  python: "Python",
+  typescript: "Typescript",
+  javascript: "Javascript",
+  html: "Html5",
+  tailwind: "Tailwindcss",
+  mysql: "Mysql",
+  postgres: "Postgresql",
+  redis: "Redis",
+  mongodb: "Mongodb",
+  docker: "Docker",
+  git: "Git",
+  github: "Github",
+  swift: "Swift",
+  kotlin: "Kotlin",
+  graphql: "Graphql",
+  sanity: "Sanity",
+  framer: "Framer",
+  figma: "Figma",
+  d3: "D3dotjs", // if your version lacks this, change to "D3"
+  aws: "Amazonaws", // simple-icons slug is "amazonaws", not "amazonwebservices"
+  vercel: "Vercel",
+  vite: "Vite",
+  mui: "Mui",
+  inertia: "Inertia",
 };
+
+/** Resolve a SimpleIcon from the namespace by slug, or null if not found. */
+function resolveIcon(slug: string): SimpleIcon | null {
+  const key = `si${slug}` as keyof typeof SI;
+  const icon = SI[key];
+  // SimpleIcon objects always have a .path string property
+  if (icon && typeof (icon as SimpleIcon).path === "string") {
+    return icon as SimpleIcon;
+  }
+  return null;
+}
 
 export default function TechIcon({
   name,
-  size = 18,
+  size = 14,
   className = "",
-  style,
   label,
-  showLabel = false,
-  onMouseEnter,
-  onMouseLeave,
+  showLabel = true,
 }: Props) {
   const tech = detectTech(name);
+  const isUrl = name.startsWith("http");
 
+  // Unrecognized tech — render plain text chip, linked if URL
   if (!tech) {
-    const fallbackLabel = label ?? name;
+    const fallbackLabel =
+      label ?? (isUrl ? new URL(name).hostname.replace("www.", "") : name);
+    const fallbackHref = isUrl ? name : undefined;
 
-    return (
-      <span
-        className={`inline-flex items-center gap-3 ${className}`}
-        style={style}
-      >
-        <span className="telem-label" style={{ fontSize: size }}>
+    if (fallbackHref) {
+      return (
+        <a
+          href={fallbackHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`chip inline-flex items-center gap-1.5 ${className}`}
+        >
           {fallbackLabel}
-        </span>
+        </a>
+      );
+    }
+    return (
+      <span className={`chip inline-flex items-center gap-1.5 ${className}`}>
+        {fallbackLabel}
       </span>
     );
   }
 
+  const slug = SLUG_MAP[tech];
+  const icon = resolveIcon(slug);
   const ariaLabel = label ?? TECH_LABELS[tech];
   const href = TECH_URLS[tech];
+
+  // Icon not found in installed simple-icons version — degrade to text chip
+  if (!icon) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={ariaLabel}
+        title={ariaLabel}
+        className={`chip inline-flex items-center gap-1.5 ${className}`}
+      >
+        {showLabel ? ariaLabel : "?"}
+      </a>
+    );
+  }
 
   return (
     <a
@@ -163,10 +148,7 @@ export default function TechIcon({
       rel="noopener noreferrer"
       aria-label={ariaLabel}
       title={ariaLabel}
-      className={`inline-flex items-center gap-3 ${className}`}
-      style={style}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      className={`chip inline-flex items-center gap-1.5 flex-shrink-0 ${className}`}
     >
       <svg
         role="img"
@@ -177,12 +159,12 @@ export default function TechIcon({
         fill="currentColor"
         aria-hidden="true"
         focusable="false"
-        className="flex-shrink-0"
       >
-        {ICONS[tech]}
+        <title>{icon.title}</title>
+        <path d={icon.path} />
       </svg>
 
-      {showLabel && <span className="telem-label">{ariaLabel}</span>}
+      {showLabel && <span>{ariaLabel}</span>}
     </a>
   );
 }

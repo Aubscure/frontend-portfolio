@@ -195,7 +195,7 @@ export default function AboutSection({ profile }: Props) {
           {techStack?.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-10">
               {techStack.map((item) => (
-                <TechIcon key={item} name={item} size={12} showLabel />
+                <TechIcon key={item} name={item} size={20} showLabel />
               ))}
             </div>
           )}

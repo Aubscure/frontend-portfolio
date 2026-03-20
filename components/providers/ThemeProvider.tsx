@@ -16,7 +16,7 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: "dark", // JDM aesthetic is always dark-first
+  theme: "light", // light default
   toggle: () => {},
 });
 
@@ -25,8 +25,7 @@ export function useTheme() {
 }
 
 function applyTheme(t: Theme) {
-  const root = document.documentElement;
-  root.classList.toggle("dark", t === "dark");
+  document.documentElement.classList.toggle("dark", t === "dark");
 }
 
 export default function ThemeProvider({
@@ -34,22 +33,24 @@ export default function ThemeProvider({
 }: {
   children: React.ReactNode;
 }) {
-  // Default to dark — the JDM instrument panel is always dark
-  const [theme, setTheme] = useState<Theme>("dark");
+  // Light is the default. The anti-flash script in layout.tsx handles the
+  // initial SSR/hydration pass — this state syncs on mount.
+  const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
     const stored = localStorage.getItem("portfolio-theme") as Theme | null;
-    const preferred = window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-    const resolved = stored ?? preferred;
+    const systemPrefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
+    // Respect stored preference; fall back to system; default to light.
+    const resolved = stored ?? (systemPrefersDark ? "dark" : "light");
     setTheme(resolved);
     applyTheme(resolved);
   }, []);
 
   const toggle = useCallback(() => {
     setTheme((prev) => {
-      const next: Theme = prev === "dark" ? "light" : "dark";
+      const next: Theme = prev === "light" ? "dark" : "light";
       applyTheme(next);
       localStorage.setItem("portfolio-theme", next);
       return next;

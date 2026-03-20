@@ -88,6 +88,7 @@ export default function HeroSection({ profile }: Props) {
               letterSpacing: "-0.01em",
               textTransform: "uppercase",
               color: "var(--color-ink)",
+              marginLeft: "20px",
             }}
           >
             {firstName}&nbsp;
@@ -121,7 +122,7 @@ export default function HeroSection({ profile }: Props) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: EASE_BOOT, delay: 0.3 }}
-            className="text-[0.92rem] leading-[1.8] max-w-[500px] mb-10"
+            className="text-[0.92rem] leading-[1.8] max-w-[500px] mb-10 ml-4"
             style={{ color: "var(--color-ink-dim)" }}
           >
             {aboutDescription}
@@ -161,7 +162,7 @@ export default function HeroSection({ profile }: Props) {
                 <SocialIcon
                   key={href}
                   href={href}
-                  size={18}
+                  size={30}
                   style={{ color: "var(--color-ink-dim)" }}
                   onMouseEnter={(e) =>
                     (e.currentTarget.style.color = "var(--color-red)")

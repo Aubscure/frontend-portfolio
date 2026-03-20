@@ -167,7 +167,7 @@ export default function ProjectCard({ project, index }: Props) {
         {/* Tech stack chips */}
         <div className="flex flex-wrap gap-1.5 mb-4">
           {project.projectTechStack.map((tag) => (
-            <TechIcon key={tag} name={tag} size={11} showLabel />
+            <TechIcon key={tag} name={tag} size={20} showLabel />
           ))}
         </div>
 

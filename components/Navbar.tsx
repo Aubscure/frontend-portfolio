@@ -13,17 +13,18 @@ interface Props {
 }
 
 export default function Navbar({ logoUrl, name }: Props) {
-  const [dark, setDark] = useState(true);
+  const [dark, setDark] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
+    // Sync local state with the theme already applied by the anti-flash script.
+    // Light is the default — only set dark if stored or system prefers it.
     const stored = localStorage.getItem("portfolio-theme");
-    if (stored === "light") {
-      document.documentElement.classList.remove("dark");
-      setDark(false);
-    } else {
-      document.documentElement.classList.add("dark");
-    }
+    const systemDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
+    const isDark = stored === "dark" || (!stored && systemDark);
+    setDark(isDark);
 
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll, { passive: true });

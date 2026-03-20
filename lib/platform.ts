@@ -1,11 +1,8 @@
 /**
  * lib/platform.ts
  *
- * Utilities for detecting social platform from a URL or mailto: string,
- * and for detecting tech stack entries from a name or URL.
- *
- * Extracted from icon components so detection logic can be tested
- * independently and reused without importing React.
+ * Platform and tech-stack detection utilities.
+ * Kept completely separate from UI so these can be unit-tested independently.
  */
 
 // ─── Social Platform ─────────────────────────────────────────────────────────
@@ -46,7 +43,7 @@ export function detectSocialPlatform(href: string): SocialPlatform {
     if (h.includes("youtube.com")) return "youtube";
     if (h.includes("dribbble.com")) return "dribbble";
   } catch {
-    // Not a valid URL, fall through to globe
+    /* noop */
   }
   return "globe";
 }
@@ -57,7 +54,7 @@ export type Tech =
   | "react"
   | "nextjs"
   | "vue"
-  | "nuxt" // Added Nuxt
+  | "nuxt"
   | "svelte"
   | "angular"
   | "laravel"
@@ -68,6 +65,7 @@ export type Tech =
   | "python"
   | "typescript"
   | "javascript"
+  | "html"
   | "tailwind"
   | "mysql"
   | "postgres"
@@ -87,14 +85,13 @@ export type Tech =
   | "vercel"
   | "vite"
   | "mui"
-  | "html"
   | "inertia";
 
 export const TECH_LABELS: Record<Tech, string> = {
   react: "React",
   nextjs: "Next.js",
   vue: "Vue",
-  nuxt: "Nuxt", // Added Nuxt
+  nuxt: "Nuxt",
   svelte: "Svelte",
   angular: "Angular",
   laravel: "Laravel",
@@ -105,7 +102,8 @@ export const TECH_LABELS: Record<Tech, string> = {
   python: "Python",
   typescript: "TypeScript",
   javascript: "JavaScript",
-  tailwind: "Tailwind",
+  html: "HTML5",
+  tailwind: "Tailwind CSS",
   mysql: "MySQL",
   postgres: "PostgreSQL",
   redis: "Redis",
@@ -125,14 +123,13 @@ export const TECH_LABELS: Record<Tech, string> = {
   vite: "Vite",
   mui: "Material UI",
   inertia: "Inertia.js",
-  html: "HTML",
 };
 
 export const TECH_URLS: Record<Tech, string> = {
   react: "https://react.dev",
   nextjs: "https://nextjs.org",
   vue: "https://vuejs.org",
-  nuxt: "https://nuxt.com", // Added Nuxt
+  nuxt: "https://nuxt.com",
   svelte: "https://svelte.dev",
   angular: "https://angular.dev",
   laravel: "https://laravel.com",
@@ -142,7 +139,8 @@ export const TECH_URLS: Record<Tech, string> = {
   fastapi: "https://fastapi.tiangolo.com",
   python: "https://www.python.org",
   typescript: "https://www.typescriptlang.org",
-  javascript: "https://javascript.com/",
+  javascript: "https://www.javascript.com/",
+  html: "https://developer.mozilla.org/en-US/docs/Web/HTML",
   tailwind: "https://tailwindcss.com",
   mysql: "https://www.mysql.com",
   postgres: "https://www.postgresql.org",
@@ -162,7 +160,6 @@ export const TECH_URLS: Record<Tech, string> = {
   vercel: "https://vercel.com",
   vite: "https://vite.dev",
   mui: "https://mui.com",
-  html: "https://html.com/",
   inertia: "https://inertiajs.com",
 };
 
@@ -176,7 +173,7 @@ export function detectTech(input: string): Tech | null {
       if (h.includes("react.dev")) return "react";
       if (h.includes("nextjs.org")) return "nextjs";
       if (h.includes("vuejs.org")) return "vue";
-      if (h.includes("nuxt.com") || h.includes("nuxtjs.org")) return "nuxt"; // Added Nuxt
+      if (h.includes("nuxt.com")) return "nuxt";
       if (h.includes("svelte.dev")) return "svelte";
       if (h.includes("angular")) return "angular";
       if (h.includes("laravel.com")) return "laravel";
@@ -186,8 +183,8 @@ export function detectTech(input: string): Tech | null {
       if (h.includes("fastapi")) return "fastapi";
       if (h.includes("python.org")) return "python";
       if (h.includes("typescriptlang")) return "typescript";
-      if (h.includes("javascript.com") || h.includes("developer.mozilla.org"))
-        return "javascript";
+      if (h.includes("javascript.com")) return "javascript";
+      if (h.includes("html.com")) return "html";
       if (h.includes("tailwindcss.com")) return "tailwind";
       if (h.includes("postgresql.org")) return "postgres";
       if (h.includes("redis.io")) return "redis";
@@ -204,7 +201,6 @@ export function detectTech(input: string): Tech | null {
       if (h.includes("vite.dev")) return "vite";
       if (h.includes("mui.com")) return "mui";
       if (h.includes("inertiajs.com")) return "inertia";
-      if (h.includes("html.com")) return "html";
     } catch {
       /* noop */
     }
@@ -214,7 +210,7 @@ export function detectTech(input: string): Tech | null {
   if (s === "react" || s === "reactjs") return "react";
   if (s === "next" || s === "next.js" || s === "nextjs") return "nextjs";
   if (s === "vue" || s === "vuejs" || s === "vue.js") return "vue";
-  if (s === "nuxt" || s === "nuxtjs" || s === "nuxt.js") return "nuxt"; // Added Nuxt
+  if (s === "nuxt" || s === "nuxt.js" || s === "nuxtjs") return "nuxt";
   if (s === "svelte") return "svelte";
   if (s === "angular") return "angular";
   if (s === "laravel") return "laravel";
@@ -225,6 +221,7 @@ export function detectTech(input: string): Tech | null {
   if (s === "python") return "python";
   if (s === "typescript" || s === "ts") return "typescript";
   if (s === "javascript" || s === "js") return "javascript";
+  if (s === "html" || s === "html5") return "html";
   if (s === "tailwind" || s === "tailwindcss") return "tailwind";
   if (s === "mysql") return "mysql";
   if (s.includes("postgres") || s === "pg") return "postgres";
@@ -242,11 +239,10 @@ export function detectTech(input: string): Tech | null {
   if (s === "d3" || s === "d3.js") return "d3";
   if (s === "aws") return "aws";
   if (s === "vercel") return "vercel";
-  if (s === "vite" || s === "vitejs") return "vite";
+  if (s === "vite" || s === "vite") return "vite";
   if (s === "mui" || s === "material ui" || s === "material-ui") return "mui";
   if (s === "inertia" || s === "inertia.js" || s === "inertiajs")
     return "inertia";
-  if (s === "html" || s === "html.com" || s === "html5") return "html";
 
   return null;
 }

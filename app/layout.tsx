@@ -28,29 +28,26 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-/**
- * Viewport config — themeColor MUST live here, not in the metadata export.
- * This is required as of Next.js 14+ (and enforced as a warning in Next.js 16).
- * Controls the mobile browser chrome background color.
- */
 export const viewport: Viewport = {
-  themeColor: "#0A0A0C",
+  // Light mode canvas color — matches --color-canvas default
+  themeColor: "#F5F2EE",
 };
 
 /**
- * Anti-flash script — runs before React hydration to apply the correct
- * theme class, preventing a FOUC (flash of unstyled content).
- * Dark is the default; we only remove it if the user explicitly chose light.
+ * Anti-flash script — runs synchronously before React hydration.
+ * Light is now the default. We only add `.dark` if the user has
+ * explicitly chosen dark, or their system preference is dark and
+ * they haven't stored a preference yet.
  */
 const themeScript = `
 (function(){
   try {
     var t = localStorage.getItem('portfolio-theme');
-    if (t === 'light') {
-      document.documentElement.classList.remove('dark');
-    } else {
+    if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark');
     }
+    // If t === 'light' or no preference + system is light: do nothing,
+    // the <html> element has no .dark class by default.
   } catch(e) {}
 })();
 `;
@@ -71,9 +68,10 @@ export default async function RootLayout({
     : undefined;
 
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    // No className="dark" here — light is the default, dark is added by the
+    // anti-flash script only when needed.
+    <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Barlow Condensed — the JDM display font */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -84,7 +82,6 @@ export default async function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&display=swap"
           rel="stylesheet"
         />
-        {/* Theme anti-flash: runs synchronously before hydration */}
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body

@@ -37,6 +37,6 @@ export const BOOT_LINES = [
 
 export const HERO_TELEMETRY = [
   { label: "STATUS", value: "ONLINE", unit: "" },
-  { label: "EXP", value: "5+", unit: "YR" },
+  { label: "EXP", value: "--", unit: "YR" },
   { label: "UPTIME", value: "99.9", unit: "%" },
 ] as const;
