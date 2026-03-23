@@ -37,3 +37,15 @@ export interface ProjectData {
   url: string;
   appLogoUrl: string | null;
 }
+
+// ─── Experience ──────────────────────────────────────────────────────────────
+export interface ExperienceData {
+  _id: string;
+  category: string;
+  title: string;
+  company: string | null;
+  logoUrl: string | null;
+  description: string;
+  startDate: string | null;
+  endDate: string | null;
+}

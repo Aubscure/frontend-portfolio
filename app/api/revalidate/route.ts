@@ -36,15 +36,20 @@ export async function POST(req: NextRequest) {
   }
 
   // 3. Revalidate only the affected cache tag (or both for safety)
+  // 3. Revalidate only the affected cache tag
   const docType = body._type;
+
   if (docType === "profile") {
     revalidateTag("profile", "max");
   } else if (docType === "project") {
     revalidateTag("project", "max");
+  } else if (docType === "experience") {
+    revalidateTag("experience", "max");
   } else {
     // Unknown type or no body — bust everything
     revalidateTag("profile", "max");
     revalidateTag("project", "max");
+    revalidateTag("experience", "max");
   }
 
   return NextResponse.json({ revalidated: true, now: Date.now() });

@@ -113,7 +113,7 @@ export default function HeroSection({ profile }: Props) {
               className="telem-label"
               style={{ fontSize: "0.75rem", color: "var(--color-amber)" }}
             >
-              FULL_STACK_DEVELOPER // WEB_ENGINEER
+              BACKEND_DEVELOPER // WEB_ENGINEER
             </span>
           </motion.div>
 

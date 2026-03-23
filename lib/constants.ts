@@ -19,9 +19,10 @@ export const EASE_SNAP = [0.55, 0, 0.45, 1] as const;
 // ─── Navigation ───────────────────────────────────────────────────────────────
 
 export const NAV_LINKS = [
-  { label: "Units", href: "#work", id: "SYS_01" },
-  { label: "Profile", href: "#about", id: "SYS_02" },
-  { label: "Comms", href: "#contact", id: "SYS_03" },
+  { label: "Profile", href: "#about", id: "SYS_03" },
+  { label: "Units", href: "#work", id: "SYS_02" },
+  { label: "Experience", href: "#experience", id: "SYS_01" },
+  { label: "Comms", href: "#contact", id: "SYS_04" },
 ] as const;
 
 // ─── Boot sequence messages ───────────────────────────────────────────────────

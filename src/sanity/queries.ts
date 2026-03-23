@@ -29,3 +29,16 @@ export const projectsQuery = `
     "appLogoUrl":       appLogo.asset->url
   }
 `;
+
+export const experiencesQuery = `
+  *[_type == "experience"] | order(startDate desc) {
+    _id,
+    category,
+    title,
+    company,
+    "logoUrl": logo.asset->url,
+    description,
+    startDate,
+    endDate
+  }
+`;

@@ -1,12 +1,17 @@
 import type { Metadata } from "next";
 import { sanityFetch } from "@/src/sanity/client";
-import { profileQuery, projectsQuery } from "@/src/sanity/queries";
-import type { ProfileData, ProjectData } from "@/src/types";
+import {
+  profileQuery,
+  projectsQuery,
+  experiencesQuery,
+} from "@/src/sanity/queries";
+import type { ProfileData, ProjectData, ExperienceData } from "@/src/types";
 
 import HeroSection from "@/components/HeroSection";
 import ProjectsSection from "@/components/ProjectsSection";
 import AboutSection from "@/components/AboutSection";
 import ContactSection from "@/components/ContactSection";
+import ExperienceSection from "@/components/ExperienceSection";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
@@ -30,7 +35,7 @@ function SectionDivider() {
 }
 
 export default async function HomePage() {
-  const [profile, projects] = await Promise.all([
+  const [profile, projects, experiences] = await Promise.all([
     sanityFetch<ProfileData>({
       query: profileQuery,
       tags: ["profile"],
@@ -41,6 +46,11 @@ export default async function HomePage() {
       tags: ["project"],
       revalidate: 3600,
     }),
+    sanityFetch<ExperienceData[]>({
+      query: experiencesQuery,
+      tags: ["experience"], // Crucial for the webhook
+      revalidate: 3600,
+    }),
   ]);
 
   return (
@@ -49,11 +59,15 @@ export default async function HomePage() {
 
       <SectionDivider />
 
+      <AboutSection profile={profile} />
+
+      <SectionDivider />
+
       <ProjectsSection projects={projects} />
 
       <SectionDivider />
 
-      <AboutSection profile={profile} />
+      <ExperienceSection experiences={experiences} />
 
       <SectionDivider />
 
