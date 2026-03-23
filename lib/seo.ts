@@ -5,6 +5,11 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export const baseMetadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+
+  alternates: {
+    canonical: "/",
+  },
+
   title: {
     default: "Your Name | Backend Software Engineer",
     template: "%s | Your Name",
