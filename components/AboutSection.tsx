@@ -148,7 +148,7 @@ export default function AboutSection({ profile }: Props) {
               style={{ borderTop: "1px solid var(--color-border)" }}
             >
               <TelemetryReadout label="STATUS" value="ACTIVE" accent />
-              <TelemetryReadout label="ROLE" value="FULLSTACK" />
+              <TelemetryReadout label="ROLE" value="BACKEND" />
             </div>
           </div>
         </motion.div>

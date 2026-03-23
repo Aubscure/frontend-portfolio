@@ -18,7 +18,7 @@ export default function HeroSection({ profile }: Props) {
     lastName,
     nickname,
     profilePictureUrl,
-    aboutDescription,
+    philosophy,
     resumeUrl,
     socialLinks,
   } = profile;
@@ -38,13 +38,13 @@ export default function HeroSection({ profile }: Props) {
       {/* Dot-grid background pattern */}
       <div className="dot-grid absolute inset-0 pointer-events-none" />
 
-      {/* Diagonal stripe accent — pure CSS, no images */}
+      {/* Diagonal stripe accent */}
       <div
         className="stripe-bg absolute inset-0 pointer-events-none"
         style={{ opacity: 0.6 }}
       />
 
-      {/* Vertical red rule — left margin indicator */}
+      {/* Vertical red rule */}
       <div
         style={{
           position: "absolute",
@@ -75,7 +75,7 @@ export default function HeroSection({ profile }: Props) {
             </span>
           </motion.div>
 
-          {/* Primary heading — Barlow Condensed, massive */}
+          {/* Primary heading */}
           <motion.h1
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -95,7 +95,7 @@ export default function HeroSection({ profile }: Props) {
             <span style={{ color: "var(--color-red)" }}>{lastName}</span>
           </motion.h1>
 
-          {/* Subtitle — monospace role descriptor */}
+          {/* Subtitle */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -117,23 +117,28 @@ export default function HeroSection({ profile }: Props) {
             </span>
           </motion.div>
 
-          {/* About text */}
-          <motion.p
+          {/* Philosophy Callout Block */}
+          <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: EASE_BOOT, delay: 0.3 }}
-            className="text-[0.92rem] leading-[1.8] max-w-[500px] mb-10 ml-4"
-            style={{ color: "var(--color-ink-dim)" }}
+            className="mb-10 ml-4 pl-5 py-1 border-l-[3px] max-w-[540px]"
+            style={{ borderColor: "var(--color-amber)" }}
           >
-            {aboutDescription}
-          </motion.p>
+            <p
+              className="text-[1.3rem] leading-[1.8] font-medium italic"
+              style={{ color: "var(--color-ink)" }}
+            >
+              {philosophy}
+            </p>
+          </motion.div>
 
           {/* CTA buttons */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease: EASE_BOOT, delay: 0.4 }}
-            className="flex items-center gap-4 flex-wrap mb-8"
+            className="flex items-center gap-4 flex-wrap mb-8 ml-4"
           >
             <a href="#work" className="btn-primary">
               View Units
@@ -156,7 +161,7 @@ export default function HeroSection({ profile }: Props) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4, delay: 0.55 }}
-              className="flex items-center gap-5"
+              className="flex items-center gap-5 ml-4"
             >
               {socialHrefs.map((href) => (
                 <SocialIcon
@@ -183,7 +188,7 @@ export default function HeroSection({ profile }: Props) {
           transition={{ duration: 0.6, ease: EASE_BOOT, delay: 0.15 }}
           className="hidden md:flex flex-col gap-0"
         >
-          {/* Profile image frame — instrument bezel style */}
+          {/* Profile image frame */}
           <div
             style={{
               width: "350px",
@@ -193,7 +198,7 @@ export default function HeroSection({ profile }: Props) {
               borderTop: "3px solid var(--color-red)",
             }}
           >
-            {/* Corner ticks — schematic decoration */}
+            {/* Corner ticks */}
             {["top-0 right-0", "bottom-0 right-0"].map((pos) => (
               <span
                 key={pos}
@@ -280,7 +285,7 @@ export default function HeroSection({ profile }: Props) {
             )}
           </div>
 
-          {/* Telemetry readouts below the image */}
+          {/* Telemetry readouts */}
           <div
             className="grid grid-cols-3"
             style={{ width: "350px", borderTop: "none" }}
@@ -298,7 +303,7 @@ export default function HeroSection({ profile }: Props) {
         </motion.div>
       </div>
 
-      {/* Bottom separator with label */}
+      {/* Bottom separator */}
       <div
         className="absolute bottom-0 left-8 right-8 flex items-center gap-4"
         style={{ borderTop: "1px solid var(--color-border)" }}

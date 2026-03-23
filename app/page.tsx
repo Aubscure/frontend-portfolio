@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { sanityFetch } from "@/src/sanity/client";
 import {
   profileQuery,
@@ -35,6 +36,29 @@ function SectionDivider() {
 }
 
 export default async function HomePage() {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Your Name",
+    jobTitle: "Software Engineer",
+    url: process.env.NEXT_PUBLIC_SITE_URL,
+    sameAs: [
+      "https://github.com/yourusername",
+      "https://linkedin.com/in/yourusername",
+    ],
+    alumniOf: {
+      "@type": "CollegeOrUniversity",
+      name: "Your University Name", // Highly recommended for local SEO context
+    },
+    knowsAbout: [
+      "Backend Development",
+      "Laravel",
+      "PHP",
+      "Python",
+      "System Architecture",
+      "API Integration",
+    ],
+  };
   const [profile, projects, experiences] = await Promise.all([
     sanityFetch<ProfileData>({
       query: profileQuery,
@@ -55,6 +79,11 @@ export default async function HomePage() {
 
   return (
     <>
+      <Script
+        id="schema-person"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <HeroSection profile={profile} />
 
       <SectionDivider />

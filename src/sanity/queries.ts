@@ -8,6 +8,7 @@ export const profileQuery = `
     lastName,
     nickname,
     "logoUrl":           logo.asset->url,
+    philosophy,
     aboutDescription,
     "profilePictureUrl": profilePicture.asset->url,
     "resumeUrl":         resume.asset->url,

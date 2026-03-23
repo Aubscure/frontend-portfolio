@@ -18,6 +18,7 @@ export interface ProfileData {
   lastName: string;
   nickname: string;
   logoUrl: string | null;
+  philosophy: string | null;
   aboutDescription: string;
   profilePictureUrl: string | null;
   resumeUrl: string | null;

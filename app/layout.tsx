@@ -1,3 +1,5 @@
+import { baseMetadata } from "@/lib/seo";
+
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { sanityFetch } from "@/src/sanity/client";
@@ -17,16 +19,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
   display: "swap",
 });
-
-export const metadata: Metadata = {
-  title: { default: "Portfolio", template: "%s · Portfolio" },
-  description: "Full-stack developer — precision engineering for the web.",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  ),
-  openGraph: { type: "website", locale: "en_US" },
-  robots: { index: true, follow: true },
-};
+export const metadata: Metadata = baseMetadata;
 
 export const viewport: Viewport = {
   // Light mode canvas color — matches --color-canvas default
