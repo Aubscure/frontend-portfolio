@@ -108,7 +108,11 @@ export default function ProjectCard({ project, index }: Props) {
   };
 
   const unitId = `UNIT_${String(index + 1).padStart(3, "0")}`;
-  const href = project.url ?? "#";
+  
+  // Calculate system status based on available deployment vectors
+  const hasLive = !!project.liveUrl;
+  const hasGit = project.githubLinks && project.githubLinks.length > 0;
+  const systemStatus = (hasLive && hasGit) ? "HYBRID_DEPLOY" : hasLive ? "LIVE_DEPLOY" : "SRC_AVAILABLE";
 
   return (
     <motion.div
@@ -128,11 +132,11 @@ export default function ProjectCard({ project, index }: Props) {
         transformStyle: "preserve-3d",
         perspective: 900,
       }}
-      className="panel group relative overflow-hidden cursor-pointer"
+      className="panel group relative overflow-hidden cursor-pointer flex flex-col h-full"
     >
-      {/* Header bar — unit ID + status */}
+      {/* Header bar */}
       <div
-        className="flex items-center justify-between px-4 py-2.5"
+        className="flex items-center justify-between px-4 py-2.5 shrink-0"
         style={{
           background: "var(--color-surface-hi)",
           borderBottom: "1px solid var(--color-border)",
@@ -151,19 +155,21 @@ export default function ProjectCard({ project, index }: Props) {
           className="telem-label"
           style={{ fontSize: "0.55rem", opacity: 0.4 }}
         >
-          {project.linkChoice === "github" ? "SRC_AVAILABLE" : "LIVE_DEPLOY"}
+          {systemStatus}
         </span>
       </div>
 
       {/* Media */}
-      <ProjectMedia
-        mediaUrl={project.mediaUrl}
-        mediaContentType={project.mediaContentType}
-        title={project.title}
-      />
+      <div className="shrink-0">
+        <ProjectMedia
+          mediaUrl={project.mediaUrl}
+          mediaContentType={project.mediaContentType}
+          title={project.title}
+        />
+      </div>
 
       {/* Content */}
-      <div className="p-5">
+      <div className="p-5 flex flex-col flex-grow">
         {/* Tech stack chips */}
         <div className="flex flex-wrap gap-1.5 mb-4">
           {project.projectTechStack.map((tag) => (
@@ -187,32 +193,58 @@ export default function ProjectCard({ project, index }: Props) {
 
         {/* Description */}
         <p
-          className="text-[0.8rem] leading-[1.7] mb-5"
+          className="text-[0.8rem] leading-[1.7] mb-5 flex-grow"
           style={{ color: "var(--color-ink-dim)" }}
         >
           {project.description}
         </p>
 
-        {/* CTA link */}
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 no-underline transition-all duration-150 group-hover:gap-3"
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "0.65rem",
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "var(--color-red)",
-          }}
-        >
-          {project.linkChoice === "github" ? "VIEW_SRC" : "VISIT_UNIT"}
-          <span style={{ fontSize: "0.8rem" }}>→</span>
-        </a>
+        {/* Link Aggregation Area */}
+        <div className="flex flex-col gap-3 mt-auto pt-4" style={{ borderTop: "1px solid var(--color-border)" }}>
+          {/* Live Deployment Link */}
+          {project.liveUrl && (
+            <a
+              href={project.liveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 no-underline transition-all duration-150 group-hover:gap-3"
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "0.65rem",
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "var(--color-red)",
+              }}
+            >
+              VISIT_UNIT
+              <span style={{ fontSize: "0.8rem" }}>→</span>
+            </a>
+          )}
+
+          {/* GitHub Source Links */}
+          {project.githubLinks && project.githubLinks.map((link) => (
+            <a
+              key={link._key}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 no-underline transition-all duration-150 group-hover:gap-3"
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "0.65rem",
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "var(--color-ink)",
+              }}
+            >
+              VIEW_SRC: {link.label}
+              <span style={{ fontSize: "0.8rem" }}>→</span>
+            </a>
+          ))}
+        </div>
       </div>
 
-      {/* Bottom accent line — grows on hover */}
+      {/* Bottom accent line */}
       <div
         className="absolute bottom-0 left-0 right-0 h-[2px]"
         style={{

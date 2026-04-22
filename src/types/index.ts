@@ -1,7 +1,5 @@
-// types/index.ts — Single source of truth for all CMS-derived types.
-// No `any` types. All nullable fields are explicitly typed.
+// types/index.ts
 
-// ─── Profile ──────────────────────────────────────────────────────────────────
 export interface SocialLinks {
   github: string | null;
   linkedin: string | null;
@@ -26,20 +24,25 @@ export interface ProfileData {
   socialLinks: SocialLinks;
 }
 
-// ─── Project ─────────────────────────────────────────────────────────────────
+// Define the shape of the Sanity array object
+export interface GithubLink {
+  _key: string; 
+  label: string;
+  url: string;
+}
+
 export interface ProjectData {
   _id: string;
   title: string;
   description: string;
   mediaUrl: string | null;
-  mediaContentType: string | null; // e.g. 'video/mp4', 'image/gif', 'image/png'
+  mediaContentType: string | null;
   projectTechStack: string[];
-  linkChoice: "github" | "domain";
-  url: string;
+  githubLinks: GithubLink[] | null;
+  liveUrl: string | null;
   appLogoUrl: string | null;
 }
 
-// ─── Experience ──────────────────────────────────────────────────────────────
 export interface ExperienceData {
   _id: string;
   category: string;

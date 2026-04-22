@@ -25,8 +25,12 @@ export const projectsQuery = `
     "mediaUrl":         media.asset->url,
     "mediaContentType": media.asset->mimeType,
     projectTechStack,
-    linkChoice,
-    url,
+    liveUrl,
+    githubLinks[]{
+      _key,
+      label,
+      url
+    },
     "appLogoUrl":       appLogo.asset->url
   }
 `;
