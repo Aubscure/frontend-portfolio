@@ -1,7 +1,7 @@
 // src/lib/seo.ts
 import type { Metadata } from "next";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://crystal-aubrey-j-amante.vercel.app/";
 
 export const baseMetadata: Metadata = {
   metadataBase: new URL(SITE_URL),
