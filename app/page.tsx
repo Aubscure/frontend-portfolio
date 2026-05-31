@@ -16,7 +16,7 @@ import ExperienceSection from "@/components/ExperienceSection";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Portfolio",
+  title: "Crystal Aubrey J Amante",
   description: "Full-stack developer — precision engineering for the web.",
 };
 
