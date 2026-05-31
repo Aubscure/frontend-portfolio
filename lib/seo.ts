@@ -11,13 +11,13 @@ export const baseMetadata: Metadata = {
   },
 
   title: {
-    default: "Your Name | Backend Software Engineer",
-    template: "%s | Your Name",
+    default: "Crystal Aubrey J Amante | Backend Software Engineer",
+    template: "%s | Crystal Aubrey J Amante",
   },
   description:
     "Backend-focused software developer specializing in robust system architecture, secure API integrations, and scalable web solutions.",
-  authors: [{ name: "Your Name" }],
-  creator: "Your Name",
+  authors: [{ name: "Crystal Aubrey J Amante" }],
+  creator: "Crystal Aubrey J Amante",
 
   // ADD THIS VERIFICATION BLOCK HERE
   verification: {
