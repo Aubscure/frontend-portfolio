@@ -21,7 +21,7 @@ export const baseMetadata: Metadata = {
 
   // ADD THIS VERIFICATION BLOCK HERE
   verification: {
-    google: "google4ae738e6c3492329",
+    google: "euzMyYn4rqkXvrO1dTiu5EepM_LiHOHNmDkUPMmqvDM",
   },
 
   openGraph: {
