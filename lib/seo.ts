@@ -28,19 +28,19 @@ export const baseMetadata: Metadata = {
     type: "website",
     locale: "en_PH",
     url: SITE_URL,
-    siteName: "Your Name Portfolio",
+    siteName: "Crystal Aubrey J Amante Portfolio",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Your Name - Backend Engineer",
+        alt: "Crystal Aubrey J Amante - Backend Engineer",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Your Name | Backend Software Engineer",
+    title: "Crystal Aubrey J Amante | Backend Software Engineer",
     description:
       "Backend-focused software developer specializing in robust system architecture.",
     images: ["/og-image.jpg"],
