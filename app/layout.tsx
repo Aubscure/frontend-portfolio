@@ -63,7 +63,7 @@ export default async function RootLayout({
   return (
     // No className="dark" here — light is the default, dark is added by the
     // anti-flash script only when needed.
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning> 
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link

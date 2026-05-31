@@ -26,7 +26,7 @@ export const metadata: Metadata = {
  * A hairline rule with a centered label — mimics instrument cluster
  * segment separators. No component file needed; it's trivially small.
  */
-function SectionDivider() {
+function SectionDivider() { 
   return (
     <div
       className="max-w-[1280px] mx-auto px-8"
