@@ -15,17 +15,12 @@ import ContactSection from "@/components/ContactSection";
 import ExperienceSection from "@/components/ExperienceSection";
 import Footer from "@/components/Footer";
 
+// Note: Replaced the forbidden punctuation in the description.
 export const metadata: Metadata = {
-  title: "Crystal Aubrey J Amante",
-  description: "Full-stack developer — precision engineering for the web.",
+  title: "Crystal Aubrey J Amante | Backend Software Engineer",
+  description: "Backend software developer: precision engineering and robust system architecture.",
 };
 
-/**
- * SectionDivider
- *
- * A hairline rule with a centered label — mimics instrument cluster
- * segment separators. No component file needed; it's trivially small.
- */
 function SectionDivider() { 
   return (
     <div
@@ -36,29 +31,6 @@ function SectionDivider() {
 }
 
 export default async function HomePage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: "Your Name",
-    jobTitle: "Software Engineer",
-    url: process.env.NEXT_PUBLIC_SITE_URL,
-    sameAs: [
-      "https://github.com/yourusername",
-      "https://linkedin.com/in/yourusername",
-    ],
-    alumniOf: {
-      "@type": "CollegeOrUniversity",
-      name: "Your University Name", // Highly recommended for local SEO context
-    },
-    knowsAbout: [
-      "Backend Development",
-      "Laravel",
-      "PHP",
-      "Python",
-      "System Architecture",
-      "API Integration",
-    ],
-  };
   const [profile, projects, experiences] = await Promise.all([
     sanityFetch<ProfileData>({
       query: profileQuery,
@@ -72,10 +44,37 @@ export default async function HomePage() {
     }),
     sanityFetch<ExperienceData[]>({
       query: experiencesQuery,
-      tags: ["experience"], // Crucial for the webhook
+      tags: ["experience"], 
       revalidate: 3600,
     }),
   ]);
+
+  const fullName = profile ? `${profile.firstName} ${profile.lastName}` : "Crystal Aubrey J Amante";
+
+  // Dynamically populate the structured data
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: fullName,
+    jobTitle: "Backend Software Developer",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://crystal-aubrey-j-amante.vercel.app/",
+    sameAs: profile?.socialLinks || [
+      "https://github.com/Aubscure",
+      "https://www.linkedin.com/in/aubrey-amante-588785257/",
+    ],
+    alumniOf: {
+      "@type": "CollegeOrUniversity",
+      name: "STI College of Davao", 
+    },
+    knowsAbout: [
+      "Backend Development",
+      "Laravel",
+      "PHP",
+      "Python",
+      "System Architecture",
+      "API Integration",
+    ],
+  };
 
   return (
     <>
@@ -85,23 +84,14 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       <HeroSection profile={profile} />
-
       <SectionDivider />
-
       <AboutSection profile={profile} />
-
       <SectionDivider />
-
       <ProjectsSection projects={projects} />
-
       <SectionDivider />
-
       <ExperienceSection experiences={experiences} />
-
       <SectionDivider />
-
-      <ContactSection socialLinks={profile.socialLinks} />
-
+      <ContactSection socialLinks={profile?.socialLinks} />
       <Footer profile={profile} />
     </>
   );
